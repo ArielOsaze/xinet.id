@@ -4,6 +4,7 @@ import { useLang } from "@/components/providers/language-provider";
 import { COPY, LAB_CATEGORIES, LAB_ITEMS } from "@/lib/content";
 import { Reveal } from "@/components/ui/reveal";
 import PixelTransition from "@/components/reactbits/PixelTransition";
+import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import { cn } from "@/lib/utils";
 
 /**
@@ -101,19 +102,27 @@ export function Labs() {
                 key={item.name}
                 as="li"
                 delay={i * 60}
-                className="border-line group hover:bg-white/[0.02] border-r border-b p-7 transition-colors duration-500 motion-reduce:transition-none"
+                className="border-line group border-r border-b transition-colors duration-500 motion-reduce:transition-none"
               >
-                <div className="mb-4 flex items-center gap-2.5">
-                  <span className="border-line-strong text-ink-subtle rounded-full border px-2.5 py-0.5 text-[0.625rem] font-medium tracking-[0.1em] uppercase">
-                    {t(item.status)}
-                  </span>
-                </div>
-                <h3 className="text-ink font-mono text-[1rem] font-medium tracking-[-0.01em]">
-                  {item.name}
-                </h3>
-                <p className="text-ink-muted mt-2.5 text-sm leading-relaxed">
-                  {t(item.description)}
-                </p>
+                {/* SpotlightCard: a soft light that tracks the pointer. It is the
+                    quiet counterpart to the pixel tile above — same family of
+                    motion, far lower amplitude, so the grid stays legible. */}
+                <SpotlightCard
+                  spotlightColor="rgba(34, 199, 232, 0.10)"
+                  className="!h-full !rounded-none !border-0 !bg-transparent !p-7"
+                >
+                  <div className="mb-4 flex items-center gap-2.5">
+                    <span className="border-line-strong text-ink-subtle rounded-full border px-2.5 py-0.5 text-[0.625rem] font-medium tracking-[0.1em] uppercase">
+                      {t(item.status)}
+                    </span>
+                  </div>
+                  <h3 className="text-ink font-mono text-[1rem] font-medium tracking-[-0.01em]">
+                    {item.name}
+                  </h3>
+                  <p className="text-ink-muted mt-2.5 text-sm leading-relaxed">
+                    {t(item.description)}
+                  </p>
+                </SpotlightCard>
               </Reveal>
             ))}
           </ul>

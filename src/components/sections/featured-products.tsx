@@ -51,7 +51,11 @@ function StackedProducts() {
       stackPosition="14%"
       scaleEndPosition="6%"
       baseScale={0.9}
-      blurAmount={1.2}
+      // No blurAmount on purpose: it writes `filter: blur()` to every card on
+      // every scroll frame, and a repaint of that blurred layer collides with
+      // the hover glare overlay, which reads as jitter. Depth is already carried
+      // by scale + offset, so the blur adds nothing but cost.
+      blurAmount={0}
       className="[&_.scroll-stack-inner]:!px-0 [&_.scroll-stack-inner]:!pt-0 [&_.scroll-stack-inner]:!pb-[35vh]"
     >
       {PRODUCTS.map((product, index) => (
@@ -79,8 +83,8 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
     <GlareHover
       // A single sweep of light across the card on hover. Restrained: low
       // opacity, no loop, and it resets on leave so the card never stays lit.
-      width="100%"
-      height="100%"
+      // Size is left to the content — passing width/height made the wrapper
+      // re-measure against the card on every hover frame.
       background="transparent"
       borderColor="transparent"
       borderRadius="1rem"
@@ -90,7 +94,6 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
       glareSize={220}
       transitionDuration={900}
       playOnce={false}
-      className="!block !border-0 !p-0"
     >
       <div
         className={cn(

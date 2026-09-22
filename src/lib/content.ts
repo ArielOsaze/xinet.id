@@ -227,15 +227,6 @@ export const LAB_ITEMS: {
     url: null,
   },
   {
-    name: "NexPlay",
-    status: { id: "Konsep awal", en: "Early concept" },
-    description: {
-      id: "Eksplorasi marketplace digital untuk komunitas gaming.",
-      en: "A digital marketplace exploration for gaming communities.",
-    },
-    url: null,
-  },
-  {
     name: "safe-loadtest",
     status: { id: "Alat internal", en: "Internal tool" },
     description: {
@@ -331,6 +322,21 @@ export const COPY = {
   build: {
     eyebrow: { id: "Yang Kami Bangun", en: "What We Build" },
     heading: { id: "Bidang yang kami kerjakan.", en: "The areas we work in." },
+  },
+  stats: {
+    eyebrow: { id: "Ekosistem Sekilas", en: "Ecosystem at a glance" },
+    heading: { id: "Terukur, bukan klaim.", en: "Measured, not claimed." },
+    body: {
+      id: "Angka di bawah hanya menghitung yang benar-benar sudah berjalan — produk yang dirilis, dan bidang yang kami kerjakan.",
+      en: "The numbers below count only what is actually running — products that shipped, and the areas we work in.",
+    },
+  },
+  how: {
+    eyebrow: { id: "Cara Kerja", en: "How It Works" },
+    heading: { id: "Dari ide ke produk yang berjalan.", en: "From idea to a running product." },
+    stepLabel: { id: "Langkah", en: "Step" },
+    back: { id: "Kembali", en: "Back" },
+    next: { id: "Lanjut", en: "Next" },
   },
   labs: {
     eyebrow: { id: "Ruang Eksperimen", en: "Experimental Space" },

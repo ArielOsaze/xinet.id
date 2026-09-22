@@ -1,6 +1,24 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
+
+/**
+ * GlareHover — a single sweep of light across an element on hover.
+ *
+ * Hardened against the jitter the stock version produced when layered inside a
+ * scroll-driven card:
+ *
+ *  - `willChange` is set only while the sweep runs, then cleared. Leaving it on
+ *    permanently promotes the element to its own compositing layer, and that
+ *    promotion collides with the parent card's per-frame transform updates.
+ *  - `activeRef` guards against re-entry: `mouseenter` fires again whenever the
+ *    pointer crosses onto a child, which restarted the animation mid-sweep and
+ *    read as flicker.
+ *  - The wrapper is `block`, not `grid place-items-center`. As a grid container
+ *    it re-measured its child on every hover frame.
+ *  - `borderRadius` is applied to the overlay too, so the sweep follows the
+ *    card's rounded corners instead of painting square ones.
+ */
 
 interface GlareHoverProps {
   width?: string;
@@ -20,11 +38,11 @@ interface GlareHoverProps {
 }
 
 const GlareHover: React.FC<GlareHoverProps> = ({
-  width = '500px',
-  height = '500px',
-  background = '#000',
-  borderRadius = '10px',
-  borderColor = '#333',
+  width = 'auto',
+  height = 'auto',
+  background = 'transparent',
+  borderRadius = '1rem',
+  borderColor = 'transparent',
   children,
   glareColor = '#ffffff',
   glareOpacity = 0.5,
@@ -50,29 +68,49 @@ const GlareHover: React.FC<GlareHoverProps> = ({
   }
 
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  const activeRef = useRef(false);
+  const releaseTimer = useRef<number | null>(null);
 
-  const animateIn = () => {
+  const animateIn = useCallback(() => {
     const el = overlayRef.current;
-    if (!el) return;
+    if (!el || activeRef.current) return;
+    activeRef.current = true;
 
+    if (releaseTimer.current) {
+      window.clearTimeout(releaseTimer.current);
+      releaseTimer.current = null;
+    }
+
+    el.style.willChange = 'background-position';
     el.style.transition = 'none';
     el.style.backgroundPosition = '-100% -100%, 0 0';
-    el.style.transition = `${transitionDuration}ms ease`;
-    el.style.backgroundPosition = '100% 100%, 0 0';
-  };
 
-  const animateOut = () => {
+    // Commit the reset before starting the transition, otherwise the browser
+    // coalesces both writes and no sweep is visible.
+    void el.offsetWidth;
+
+    el.style.transition = `background-position ${transitionDuration}ms ease`;
+    el.style.backgroundPosition = '100% 100%, 0 0';
+  }, [transitionDuration]);
+
+  const animateOut = useCallback(() => {
     const el = overlayRef.current;
     if (!el) return;
+    activeRef.current = false;
 
-    if (playOnce) {
-      el.style.transition = 'none';
-      el.style.backgroundPosition = '-100% -100%, 0 0';
-    } else {
-      el.style.transition = `${transitionDuration}ms ease`;
-      el.style.backgroundPosition = '-100% -100%, 0 0';
-    }
-  };
+    el.style.transition = playOnce
+      ? 'none'
+      : `background-position ${transitionDuration}ms ease`;
+    el.style.backgroundPosition = '-100% -100%, 0 0';
+
+    // Drop the compositing hint once the sweep has finished.
+    if (releaseTimer.current) window.clearTimeout(releaseTimer.current);
+    releaseTimer.current = window.setTimeout(() => {
+      if (overlayRef.current && !activeRef.current) {
+        overlayRef.current.style.willChange = 'auto';
+      }
+    }, transitionDuration + 60);
+  }, [playOnce, transitionDuration]);
 
   const overlayStyle: React.CSSProperties = {
     position: 'absolute',
@@ -84,12 +122,13 @@ const GlareHover: React.FC<GlareHoverProps> = ({
     backgroundSize: `${glareSize}% ${glareSize}%, 100% 100%`,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: '-100% -100%, 0 0',
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    borderRadius
   };
 
   return (
     <div
-      className={`relative grid place-items-center overflow-hidden border cursor-pointer ${className}`}
+      className={`relative block overflow-hidden ${className}`}
       style={{
         width,
         height,
@@ -101,7 +140,7 @@ const GlareHover: React.FC<GlareHoverProps> = ({
       onMouseEnter={animateIn}
       onMouseLeave={animateOut}
     >
-      <div ref={overlayRef} style={overlayStyle} />
+      <div ref={overlayRef} style={overlayStyle} aria-hidden="true" />
       {children}
     </div>
   );

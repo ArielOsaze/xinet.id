@@ -6,6 +6,8 @@ import { FeaturedProducts } from "@/components/sections/featured-products";
 import { ProductStrip } from "@/components/sections/product-strip";
 import { Philosophy } from "@/components/sections/philosophy";
 import { WhatWeBuild } from "@/components/sections/what-we-build";
+import { Stats } from "@/components/sections/stats";
+import { HowItWorks } from "@/components/sections/how-it-works";
 import { Labs } from "@/components/sections/labs";
 import { About } from "@/components/sections/about";
 import { FinalCta } from "@/components/sections/final-cta";
@@ -29,6 +31,8 @@ export default function Home() {
         <ProductStrip />
         <Philosophy />
         <WhatWeBuild />
+        <Stats />
+        <HowItWorks />
         <Labs />
         <About />
         <FinalCta />

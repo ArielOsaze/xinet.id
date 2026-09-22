@@ -66,6 +66,56 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false, address: false, email: false },
 };
 
+/**
+ * Structured data. Describes the company and lists the products as an
+ * ItemList so search engines can associate each product name with Xinet as the
+ * publisher — that association is what makes "Xinet NexShop" resolvable.
+ */
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Xinet",
+      url: SITE_URL,
+      description: DESCRIPTION,
+      slogan: "Build what's next.",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/brand/xinet-wordmark.png`,
+      },
+      knowsAbout: [
+        "digital products",
+        "commerce platforms",
+        "business software",
+        "automation",
+        "desktop applications",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "Xinet",
+      description: DESCRIPTION,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      inLanguage: ["id-ID", "en-US"],
+    },
+    {
+      "@type": "ItemList",
+      name: "Products by Xinet",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "NexShop" },
+        { "@type": "ListItem", position: 2, name: "SayBot" },
+        { "@type": "ListItem", position: 3, name: "AkunTuntas" },
+        { "@type": "ListItem", position: 4, name: "Amara AI Assistant" },
+        { "@type": "ListItem", position: 5, name: "LumaWall" },
+      ],
+    },
+  ],
+};
+
 export const viewport: Viewport = {
   themeColor: "#080A0C",
   colorScheme: "dark",
@@ -93,6 +143,10 @@ export default function RootLayout({
           Lewati ke konten
         </a>
         <LanguageProvider>{children}</LanguageProvider>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+        />
       </body>
     </html>
   );
