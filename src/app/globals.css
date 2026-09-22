@@ -1,0 +1,271 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   XINET DESIGN TOKENS
+   Dark, monochrome-first, editorial. Accent used selectively.
+   ============================================================ */
+
+@theme inline {
+  --color-base: var(--x-base);
+  --color-surface: var(--x-surface);
+  --color-elevated: var(--x-elevated);
+  --color-ink: var(--x-ink);
+  --color-ink-muted: var(--x-ink-muted);
+  --color-ink-subtle: var(--x-ink-subtle);
+  --color-line: var(--x-line);
+  --color-line-strong: var(--x-line-strong);
+  --color-accent: var(--x-accent);
+  --color-accent-soft: var(--x-accent-soft);
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-stack), ui-monospace, monospace;
+
+  /* shadcn surface mapping (kept so shadcn primitives inherit the brand) */
+  --color-background: var(--x-base);
+  --color-foreground: var(--x-ink);
+  --color-card: var(--x-surface);
+  --color-card-foreground: var(--x-ink);
+  --color-popover: var(--x-elevated);
+  --color-popover-foreground: var(--x-ink);
+  --color-primary: var(--x-ink);
+  --color-primary-foreground: var(--x-base);
+  --color-secondary: var(--x-elevated);
+  --color-secondary-foreground: var(--x-ink);
+  --color-muted: var(--x-surface);
+  --color-muted-foreground: var(--x-ink-muted);
+  --color-accent-foreground: var(--x-base);
+  --color-border: var(--x-line);
+  --color-input: var(--x-line);
+  --color-ring: var(--x-accent);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  --x-base: #080a0c;
+  --x-surface: #101316;
+  --x-elevated: #15191d;
+  --x-ink: #f5f7f8;
+  --x-ink-muted: #929aa3;
+  --x-ink-subtle: #7a838c;
+  --x-line: rgba(255, 255, 255, 0.08);
+  --x-line-strong: rgba(255, 255, 255, 0.16);
+  --x-accent: #22c7e8;
+  --x-accent-soft: rgba(34, 199, 232, 0.14);
+
+  --radius: 0.625rem;
+  --x-nav-h: 4.5rem;
+  --x-gutter: clamp(1.25rem, 5vw, 5rem);
+  --x-max: 78rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--x-line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--x-nav-h) + 1rem);
+  }
+
+  body {
+    background-color: var(--x-base);
+    color: var(--x-ink);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* The tile sequence animates elements beyond the viewport edge; clip at the
+     root so no section can ever introduce a horizontal scrollbar. */
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  /* Editorial heading defaults */
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.028em;
+    font-weight: 600;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--x-accent);
+    color: var(--x-base);
+  }
+
+  /* Visible, high-contrast focus for keyboard users */
+  :focus-visible {
+    outline: 2px solid var(--x-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Restrained scrollbar that matches the dark shell */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--x-base);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    border: 3px solid var(--x-base);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+@utility shell {
+  width: 100%;
+  max-width: var(--x-max);
+  margin-inline: auto;
+  padding-inline: var(--x-gutter);
+}
+
+/* Small caps section label */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--x-ink-subtle);
+}
+
+/* Hairline rule that fades at both ends */
+@utility hairline {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--x-line-strong) 15%,
+    var(--x-line-strong) 85%,
+    transparent
+  );
+}
+
+/* Fine grid backdrop, extremely low contrast */
+@utility grid-bg {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+/* ============================================================
+   MOTION SAFETY
+   Honour prefers-reduced-motion everywhere: kill decorative
+   animation, keep content fully visible and stable.
+   ============================================================ */
+
+/* Slow horizontal sweep used only in the closing CTA */
+@keyframes xinet-sweep {
+  from {
+    background-position: 180% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+/* Hero logo entrance: blur-to-sharp + lift, ending fully stable.
+   CSS-only so it always completes — a JS timeline that fails to fire
+   would leave the logo invisible. */
+@keyframes xinet-logo-in {
+  0% {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(14px) scale(0.985);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0) scale(1);
+  }
+}
+
+.xinet-logo-in {
+  animation: xinet-logo-in 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+/* Hero veil: ogl's setSize() sets the canvas CSS size too, so a reduced
+   resolutionScale would shrink the canvas and leave a hard vertical seam.
+   Force the element full-bleed and keep the cheaper buffer. */
+.hero-veil canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Land on the final frame immediately: visible, unblurred, untransformed. */
+  .xinet-logo-in {
+    animation: none;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* ReactBits / GSAP driven elements must never stay hidden */
+  [data-motion],
+  .word,
+  .rb-anim {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
