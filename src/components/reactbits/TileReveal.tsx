@@ -272,7 +272,7 @@ export function TileReveal({
               // height budget. Using max-height alone lets the last row clip,
               // because each tile's aspect ratio keeps its width at 100% while
               // only its height is capped.
-              width: `min(${gridWidth}px, 100%, (76svh - ${(rows - 1) * gap}px) * ${cols} * ${aspect} / ${rows})`,
+              width: `min(${gridWidth}px, 100%, (82svh - ${(rows - 1) * gap}px) * ${cols} * ${aspect} / ${rows})`,
               gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
               gap,
             }}

@@ -48,7 +48,9 @@ export function AppWindow({
         <span aria-hidden="true" className="w-11 shrink-0" />
       </div>
 
-      {/* Real product capture */}
+      {/* Real product capture. `object-contain` keeps the whole screenshot
+          visible: cropping a product UI cuts off the very parts that show what
+          it does. The frame supplies the background so letterboxing is invisible. */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0B0E11]">
         <Image
           src={src}
@@ -56,7 +58,7 @@ export function AppWindow({
           fill
           sizes={sizes}
           priority={priority}
-          className="object-cover object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          className="object-contain object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
       </div>
     </div>
