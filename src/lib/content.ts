@@ -283,6 +283,10 @@ export const COPY = {
       id: "Logo Xinet",
       en: "Xinet logo",
     },
+    constellationLabel: {
+      id: "Crux — rasi bintang yang membentuk X",
+      en: "Crux — the constellation that forms an X",
+    },
   },
   ecosystem: {
     eyebrow: { id: "Ekosistem Kami", en: "Our Ecosystem" },
