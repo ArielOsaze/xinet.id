@@ -58,6 +58,7 @@ export function EcosystemReveal() {
         gap={14}
         gridWidth={840}
         tileAspect={1.3}
+        mobileAspect={0.82}
         tileRadius={12}
         zoom={1.5}
         spread={0.5}

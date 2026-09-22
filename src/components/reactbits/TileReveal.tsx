@@ -59,8 +59,13 @@ type TileRevealProps = {
   gap?: number;
   /** Maximum grid width in px; shrinks with the viewport. */
   gridWidth?: number;
-  /** Width-to-height ratio of each tile (used when the grid is height-capped). */
+  /** Width-to-height ratio of each tile. `mobileAspect` overrides it when set. */
   tileAspect?: number;
+  /**
+   * Ratio used on narrow screens. Mobile viewports are tall, so a lower ratio
+   * (taller tiles) lets the grid fill the screen instead of leaving dead space.
+   */
+  mobileAspect?: number;
   tileRadius?: number;
   direction?: "alternate" | "top" | "bottom";
   /** Delay between tiles, as a fraction of the fly-in window. */
@@ -83,6 +88,7 @@ export function TileReveal({
   gap = 18,
   gridWidth = 780,
   tileAspect = 1.25,
+  mobileAspect,
   tileRadius = 12,
   direction = "alternate",
   stagger = 0.5,
@@ -122,6 +128,10 @@ export function TileReveal({
 
   // Narrow screens use the reduced tile set so the settled grid fits vertically.
   const activeItems = isNarrow && mobileItems ? mobileItems : items;
+
+  // Taller tiles on mobile so the grid fills the tall viewport instead of
+  // leaving dead space below it.
+  const aspect = isNarrow && mobileAspect ? mobileAspect : tileAspect;
 
   const rows = Math.max(1, Math.ceil(activeItems.length / cols));
   const lastOrder = Math.max(1, activeItems.length - 1);
@@ -202,7 +212,7 @@ export function TileReveal({
       contentRef.current.style.transform = `translate3d(0, ${(1 - contentEased) * 18}px, 0)`;
       contentRef.current.style.pointerEvents = contentEased < 0.5 ? "none" : "auto";
     }
-  }, [activeItems.length, cols, direction, lastOrder, rows, spread, stagger, zoom]);
+  }, [activeItems.length, aspect, cols, direction, lastOrder, rows, spread, stagger, zoom]);
 
   useEffect(() => {
     if (!armed) return;
@@ -262,7 +272,7 @@ export function TileReveal({
               // height budget. Using max-height alone lets the last row clip,
               // because each tile's aspect ratio keeps its width at 100% while
               // only its height is capped.
-              width: `min(${gridWidth}px, 100%, (76svh - ${(rows - 1) * gap}px) * ${cols} * ${tileAspect} / ${rows})`,
+              width: `min(${gridWidth}px, 100%, (76svh - ${(rows - 1) * gap}px) * ${cols} * ${aspect} / ${rows})`,
               gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
               gap,
             }}
@@ -275,7 +285,7 @@ export function TileReveal({
                 }}
                 className="will-change-transform"
                 style={{
-                  aspectRatio: String(tileAspect),
+                  aspectRatio: String(aspect),
                   borderRadius: tileRadius,
                   // Start offscreen; the first frame corrects this immediately.
                   transform: "translate3d(0,0,0)",
