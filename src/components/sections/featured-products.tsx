@@ -5,6 +5,7 @@ import { COPY, PRODUCTS, type Product } from "@/lib/content";
 import { AppWindow } from "@/components/brand/app-window";
 import { Reveal } from "@/components/ui/reveal";
 import ScrollStack, { ScrollStackItem } from "@/components/reactbits/ScrollStack";
+import GlareHover from "@/components/reactbits/GlareHover";
 import { cn } from "@/lib/utils";
 
 /**
@@ -75,12 +76,28 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
       : `${ctaLabel} — opens in a new tab`;
 
   const inner = (
-    <div
-      className={cn(
-        "border-line grid h-full grid-cols-1 overflow-hidden rounded-2xl border bg-[#0B0E11] lg:grid-cols-12",
-        flip && "lg:[&>*:first-child]:order-2"
-      )}
+    <GlareHover
+      // A single sweep of light across the card on hover. Restrained: low
+      // opacity, no loop, and it resets on leave so the card never stays lit.
+      width="100%"
+      height="100%"
+      background="transparent"
+      borderColor="transparent"
+      borderRadius="1rem"
+      glareColor="#ffffff"
+      glareOpacity={0.045}
+      glareAngle={-30}
+      glareSize={220}
+      transitionDuration={900}
+      playOnce={false}
+      className="!block !border-0 !p-0"
     >
+      <div
+        className={cn(
+          "border-line grid h-full grid-cols-1 overflow-hidden rounded-2xl border bg-[#0B0E11] lg:grid-cols-12",
+          flip && "lg:[&>*:first-child]:order-2"
+        )}
+      >
       {/* Real product capture, framed like a window */}
       <div className="border-line relative flex items-center justify-center border-b p-5 sm:p-7 lg:col-span-7 lg:min-h-[24rem] lg:border-r lg:border-b-0 lg:p-9">
         <div className="grid-bg pointer-events-none absolute inset-0 opacity-40" />
@@ -137,7 +154,8 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </GlareHover>
   );
 
   // Products with a live destination are fully clickable; the rest are static.
