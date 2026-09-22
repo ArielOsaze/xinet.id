@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/providers/language-provider";
+import { ScrollLink } from "@/components/ui/scroll-link";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -25,11 +26,24 @@ export const metadata: Metadata = {
   applicationName: "Xinet",
   keywords: [
     "Xinet",
+    "xinet.id",
+    "Xinet Indonesia",
     "digital product company",
     "venture studio",
+    "product studio Indonesia",
     "NexShop",
+    "NexShop Cloud",
     "SayBot",
     "AkunTuntas",
+    "Amara AI Assistant",
+    "LumaWall",
+    "top up game",
+    "WhatsApp automation",
+    "software akuntansi",
+    "AI assistant Indonesia",
+    "live wallpaper Windows",
+    "digital products",
+    "business software",
     "Indonesia",
   ],
   authors: [{ name: "Xinet", url: SITE_URL }],
@@ -106,11 +120,73 @@ const STRUCTURED_DATA = {
       "@type": "ItemList",
       name: "Products by Xinet",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "NexShop" },
-        { "@type": "ListItem", position: 2, name: "SayBot" },
-        { "@type": "ListItem", position: 3, name: "AkunTuntas" },
-        { "@type": "ListItem", position: 4, name: "Amara AI Assistant" },
-        { "@type": "ListItem", position: 5, name: "LumaWall" },
+        {
+          "@type": "ListItem",
+          position: 1,
+          item: {
+            "@type": "SoftwareApplication",
+            name: "NexShop",
+            applicationCategory: "BusinessApplication",
+            description:
+              "A digital commerce platform for game top-ups, digital products and reseller services.",
+            url: "https://nexshop.cloud",
+            operatingSystem: "Web",
+            publisher: { "@id": `${SITE_URL}/#organization` },
+          },
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          item: {
+            "@type": "SoftwareApplication",
+            name: "SayBot",
+            applicationCategory: "BusinessApplication",
+            description:
+              "A multi-channel messaging workspace for WhatsApp, Telegram, Email and Website.",
+            url: "https://saybot.nexshop.cloud",
+            operatingSystem: "Web",
+            publisher: { "@id": `${SITE_URL}/#organization` },
+          },
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          item: {
+            "@type": "SoftwareApplication",
+            name: "AkunTuntas",
+            applicationCategory: "FinanceApplication",
+            description:
+              "Accounting, administration and operational software for small businesses.",
+            operatingSystem: "Web",
+            publisher: { "@id": `${SITE_URL}/#organization` },
+          },
+        },
+        {
+          "@type": "ListItem",
+          position: 4,
+          item: {
+            "@type": "SoftwareApplication",
+            name: "Amara AI Assistant",
+            applicationCategory: "UtilitiesApplication",
+            description:
+              "An AI desktop companion with a 3D avatar and voice conversation.",
+            operatingSystem: "Windows",
+            publisher: { "@id": `${SITE_URL}/#organization` },
+          },
+        },
+        {
+          "@type": "ListItem",
+          position: 5,
+          item: {
+            "@type": "SoftwareApplication",
+            name: "LumaWall",
+            applicationCategory: "UtilitiesApplication",
+            description:
+              "A Windows live wallpaper application with a multi-monitor catalog.",
+            operatingSystem: "Windows",
+            publisher: { "@id": `${SITE_URL}/#organization` },
+          },
+        },
       ],
     },
   ],
@@ -135,13 +211,14 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-base text-ink min-h-full font-sans antialiased">
-        {/* Keyboard users can jump straight to the content */}
-        <a
+        {/* Keyboard users can jump straight to the content. ScrollLink keeps the
+            `#` out of the address bar here too. */}
+        <ScrollLink
           href="#main"
           className="bg-elevated text-ink border-line focus:ring-accent sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-lg focus:border focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-2 focus:outline-none"
         >
           Lewati ke konten
-        </a>
+        </ScrollLink>
         <LanguageProvider>{children}</LanguageProvider>
         <script
           type="application/ld+json"

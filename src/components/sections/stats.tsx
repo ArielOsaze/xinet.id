@@ -4,6 +4,7 @@ import { useLang } from "@/components/providers/language-provider";
 import { COPY } from "@/lib/content";
 import { Reveal } from "@/components/ui/reveal";
 import CountUp from "@/components/reactbits/CountUp";
+import SpotlightCard from "@/components/reactbits/SpotlightCard";
 
 /**
  * Stats — a "Stats" block in the ReactBits Pro sense, built from free
@@ -13,6 +14,11 @@ import CountUp from "@/components/reactbits/CountUp";
  * invented: the product count comes from PRODUCTS, the capability count from
  * CAPABILITIES. If a number cannot be counted from real data it does not belong
  * here — invented statistics are the fastest way to lose a technical audience.
+ *
+ * Hover is a SpotlightCard: a soft light that follows the pointer *inside* the
+ * cell. It is deliberately a radial gradient rather than a filled background,
+ * because a filled hover box painted over the hairline dividers and made the
+ * grid look broken.
  */
 const STATS: { value: number; suffix: string; label: { id: string; en: string } }[] = [
   {
@@ -48,23 +54,26 @@ export function Stats() {
           <h2 className="text-ink max-w-2xl text-[clamp(1.75rem,3.4vw,2.75rem)] leading-[1.1] font-semibold">
             {t(COPY.stats.heading)}
           </h2>
-          <p className="text-ink-muted mt-6 max-w-xl text-[1.0625rem] leading-relaxed">
+          <p className="text-ink mt-6 max-w-xl text-[1.0625rem] leading-relaxed opacity-80">
             {t(COPY.stats.body)}
           </p>
         </Reveal>
 
         <dl className="border-line grid grid-cols-2 border-t border-l lg:grid-cols-4">
           {STATS.map((stat, i) => (
-            <Reveal
-              key={stat.label.en}
-              delay={i * 70}
-              className="border-line border-r border-b px-6 py-9 md:px-8 md:py-11"
-            >
-              <dd className="text-ink text-[clamp(2.25rem,5vw,3.5rem)] leading-none font-semibold tracking-[-0.04em] tabular-nums">
-                <CountUp to={stat.value} duration={1.6} separator="" />
-                {stat.suffix}
-              </dd>
-              <dt className="text-ink-muted mt-4 text-sm">{t(stat.label)}</dt>
+            <Reveal key={stat.label.en} delay={i * 70} className="border-line border-r border-b">
+              {/* The spotlight sits inside the cell and never paints over the
+                  dividers, so the grid stays intact while hovering. */}
+              <SpotlightCard
+                spotlightColor="rgba(34, 199, 232, 0.13)"
+                className="!h-full !rounded-none !border-0 !bg-transparent !px-6 !py-9 md:!px-8 md:!py-11"
+              >
+                <dd className="text-ink text-[clamp(2.25rem,5vw,3.5rem)] leading-none font-semibold tracking-[-0.04em] tabular-nums">
+                  <CountUp to={stat.value} duration={1.6} separator="" />
+                  {stat.suffix}
+                </dd>
+                <dt className="text-ink-muted mt-4 text-sm">{t(stat.label)}</dt>
+              </SpotlightCard>
             </Reveal>
           ))}
         </dl>

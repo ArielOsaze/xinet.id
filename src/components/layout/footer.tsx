@@ -3,6 +3,7 @@
 import { XinetLogo } from "@/components/brand/xinet-logo";
 import { useLang } from "@/components/providers/language-provider";
 import { COPY, FOOTER_COMPANY, FOOTER_PRODUCTS, SOCIALS } from "@/lib/content";
+import { ScrollLink } from "@/components/ui/scroll-link";
 
 /**
  * Footer — spacious and almost static. Links are grouped by role, and the
@@ -54,12 +55,12 @@ export function Footer() {
             <ul className="space-y-3">
               {FOOTER_COMPANY.map((item) => (
                 <li key={item.id}>
-                  <a
+                  <ScrollLink
                     href={`#${item.id}`}
                     className="text-ink-muted hover:text-ink text-[0.9375rem] transition-colors duration-200 motion-reduce:transition-none"
                   >
                     {t(item.label)}
-                  </a>
+                  </ScrollLink>
                 </li>
               ))}
             </ul>

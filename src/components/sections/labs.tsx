@@ -5,6 +5,7 @@ import { COPY, LAB_CATEGORIES, LAB_ITEMS } from "@/lib/content";
 import { Reveal } from "@/components/ui/reveal";
 import PixelTransition from "@/components/reactbits/PixelTransition";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
+import { ScrollLink } from "@/components/ui/scroll-link";
 import { cn } from "@/lib/utils";
 
 /**
@@ -47,7 +48,7 @@ export function Labs() {
             </Reveal>
 
             <Reveal delay={140} className="mt-10">
-              <a
+              <ScrollLink
                 href="#labs-work"
                 className="group/cta text-ink inline-flex items-center gap-2 text-sm font-medium underline decoration-transparent underline-offset-4 transition-colors duration-300 hover:underline motion-reduce:transition-none"
               >
@@ -58,7 +59,7 @@ export function Labs() {
                 >
                   →
                 </span>
-              </a>
+              </ScrollLink>
             </Reveal>
           </div>
 

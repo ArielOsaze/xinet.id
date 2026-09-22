@@ -3,20 +3,26 @@
 import { useLang } from "@/components/providers/language-provider";
 import { CAPABILITIES, COPY } from "@/lib/content";
 import { Reveal } from "@/components/ui/reveal";
-import PixelCard from "@/components/reactbits/PixelCard";
+import BorderGlow from "@/components/reactbits/BorderGlow";
 import Magnet from "@/components/reactbits/Magnet";
 
 /**
  * WhatWeBuild — capabilities expressed through numbering and typography rather
  * than icons.
  *
- * Two ReactBits effects, each doing a different job:
- *  - PixelCard: the pixel field expands on hover, the section's signature.
- *  - Magnet: the whole cell drifts a few pixels toward the pointer, so the grid
- *    feels physical rather than six flat rectangles.
+ * WHY BorderGlow AND NOT PixelCard
  *
- * Magnet is deliberately gentle (strength 14, not the default 2) and is skipped
- * entirely under `prefers-reduced-motion`.
+ * This grid used to use PixelCard, whose hover state fills the card with a
+ * canvas of pixels. Inside a card that also carries text that is the wrong
+ * effect: the pixels are painted over the copy, so hovering made the text
+ * harder to read at exactly the moment the reader is looking at it.
+ *
+ * BorderGlow puts the motion on the *border* — a light that follows the pointer
+ * around the edge — so the animation never overlaps the type. The interior stays
+ * a flat, readable surface at all times.
+ *
+ * Magnet is kept but is deliberately gentle: the whole cell drifts a few pixels
+ * toward the pointer so the grid feels physical rather than six flat rectangles.
  */
 export function WhatWeBuild() {
   const { t } = useLang();
@@ -32,20 +38,26 @@ export function WhatWeBuild() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CAPABILITIES.map((cap, i) => (
-          <Reveal key={cap.n} delay={i * 50}>
+          <Reveal key={cap.n} delay={i * 50} className="h-full">
             <Magnet
-              padding={70}
-              magnetStrength={14}
+              padding={60}
+              magnetStrength={18}
               wrapperClassName="block h-full"
               innerClassName="h-full"
             >
-              <PixelCard
-                // Restrained palette: cyan accent for the first three, neutral
-                // for the rest, so the grid does not turn into a colour wheel.
-                variant={i < 3 ? "blue" : "default"}
-                gap={7}
-                speed={38}
-                className="!aspect-auto !h-full !w-full !min-h-[13.5rem] !place-items-stretch !rounded-xl !border-[var(--x-line)] !bg-[#0B0E11] !p-7"
+              <BorderGlow
+                // Brand cyan family only. The component's stock palette is
+                // purple/pink/blue, which the brand rules out.
+                colors={["#22c7e8", "#7dd3fc", "#a5f3fc"]}
+                backgroundColor="#0B0E11"
+                borderRadius={12}
+                glowRadius={34}
+                glowIntensity={1.15}
+                coneSpread={28}
+                edgeSensitivity={34}
+                fillOpacity={0.42}
+                animated={false}
+                className="!h-full !min-h-[13.5rem] !border !border-[var(--x-line)] !p-7"
               >
                 <div className="relative z-[1] flex h-full flex-col">
                   <span className="text-ink-subtle font-mono text-[0.6875rem] tracking-[0.1em]">
@@ -60,7 +72,7 @@ export function WhatWeBuild() {
                     {t(cap.description)}
                   </p>
                 </div>
-              </PixelCard>
+              </BorderGlow>
             </Magnet>
           </Reveal>
         ))}

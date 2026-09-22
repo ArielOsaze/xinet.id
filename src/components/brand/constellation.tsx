@@ -54,7 +54,11 @@ type Star = {
 const STARS: Star[] = [
   { x: -0.0688, y: -1.0, mag: 0.77, color: [216, 234, 255], halo: [118, 186, 255] }, // Acrux
   { x: 0.7386, y: 0.0369, mag: 1.25, color: [210, 228, 255], halo: [114, 180, 255] }, // Mimosa
-  { x: 0.1058, y: 0.82, mag: 1.64, color: [255, 214, 172], halo: [255, 150, 82] }, // Gacrux
+  // Gacrux is genuinely a red giant, but an orange star here read as a stray
+  // amber glow against the cyan/blue brand palette. Rendered violet instead:
+  // still the odd-one-out in the field, still astronomically motivated (the
+  // star is the coolest of the five), but inside the palette.
+  { x: 0.1058, y: 0.82, mag: 1.64, color: [226, 214, 255], halo: [150, 120, 255] }, // Gacrux
   { x: -0.5066, y: 0.3227, mag: 2.79, color: [208, 224, 255], halo: [122, 176, 255] }, // Imai
   { x: -0.269, y: -0.1797, mag: 3.59, color: [238, 228, 250], halo: [170, 168, 255] }, // Ginan
 ];
@@ -199,22 +203,22 @@ export function Constellation({ className }: { className?: string }) {
       };
 
       // --- nebula wash ----------------------------------------------------
-      // Two soft radial clouds in the brand palette, offset from centre so the
-      // field has depth instead of reading as a flat black rectangle. Opacity is
-      // deliberately low per layer but stacked, because a single stronger pass
-      // reads as a coloured blob rather than as haze.
-      const drift = still ? 0 : Math.sin(time * 0.12) * 6;
+      // Soft radial clouds in the brand palette. Kept deliberately broad and
+      // low-opacity: a tight, saturated cloud reads as a coloured blob sitting
+      // on the page, whereas a wide, faint one reads as ambient light. The
+      // canvas itself is edge-masked in CSS, so this haze has no visible border.
+      const drift = still ? 0 : Math.sin(time * 0.12) * 8;
       const neb = ctx.createRadialGradient(
         cx - scale * 0.55 + drift,
         cy - scale * 0.4,
         0,
         cx - scale * 0.55 + drift,
         cy - scale * 0.4,
-        scale * 1.7
+        scale * 2.1
       );
-      neb.addColorStop(0, "rgba(34, 199, 232, 0.11)");
-      neb.addColorStop(0.35, "rgba(34, 199, 232, 0.045)");
-      neb.addColorStop(0.7, "rgba(34, 199, 232, 0.012)");
+      neb.addColorStop(0, "rgba(34, 199, 232, 0.075)");
+      neb.addColorStop(0.3, "rgba(34, 199, 232, 0.032)");
+      neb.addColorStop(0.65, "rgba(34, 199, 232, 0.009)");
       neb.addColorStop(1, "rgba(34, 199, 232, 0)");
       ctx.fillStyle = neb;
       ctx.fillRect(0, 0, w, h);
@@ -225,19 +229,19 @@ export function Constellation({ className }: { className?: string }) {
         0,
         cx + scale * 0.65 - drift,
         cy + scale * 0.55,
-        scale * 1.45
+        scale * 1.9
       );
-      neb2.addColorStop(0, "rgba(126, 152, 255, 0.075)");
-      neb2.addColorStop(0.5, "rgba(126, 152, 255, 0.022)");
-      neb2.addColorStop(1, "rgba(126, 152, 255, 0)");
+      neb2.addColorStop(0, "rgba(132, 148, 255, 0.055)");
+      neb2.addColorStop(0.45, "rgba(132, 148, 255, 0.016)");
+      neb2.addColorStop(1, "rgba(132, 148, 255, 0)");
       ctx.fillStyle = neb2;
       ctx.fillRect(0, 0, w, h);
 
-      // A third, tighter core glow sitting right behind the cross, so the stars
-      // read as embedded in the haze rather than pasted on top of it.
-      const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, scale * 0.95);
-      coreGlow.addColorStop(0, "rgba(34, 199, 232, 0.085)");
-      coreGlow.addColorStop(0.55, "rgba(34, 199, 232, 0.025)");
+      // A wider, softer core glow behind the cross, so the stars read as
+      // embedded in the haze rather than pasted on top of it.
+      const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, scale * 1.35);
+      coreGlow.addColorStop(0, "rgba(34, 199, 232, 0.055)");
+      coreGlow.addColorStop(0.5, "rgba(34, 199, 232, 0.016)");
       coreGlow.addColorStop(1, "rgba(34, 199, 232, 0)");
       ctx.fillStyle = coreGlow;
       ctx.fillRect(0, 0, w, h);
@@ -428,7 +432,13 @@ export function Constellation({ className }: { className?: string }) {
 
   return (
     <div ref={hostRef} className={cn("relative", className)} aria-hidden="true">
-      <canvas ref={canvasRef} className="block h-full w-full" />
+      {/* The nebula brightens the interior of this box relative to the page, so
+          an unmasked canvas reads as a pasted-on rectangle. A radial mask feathers
+          every edge into the background, leaving no boundary to see. */}
+      <canvas
+        ref={canvasRef}
+        className="block h-full w-full [mask-image:radial-gradient(ellipse_78%_74%_at_50%_50%,black_42%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_78%_74%_at_50%_50%,black_42%,transparent_100%)]"
+      />
     </div>
   );
 }

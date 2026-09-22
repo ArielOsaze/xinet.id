@@ -75,12 +75,11 @@ export function Hero() {
           </div>
 
           {/* Crux. Hidden below lg: on a phone the copy already fills the
-              viewport, and a constellation squeezed beside it reads as clutter. */}
+              viewport, and a constellation squeezed beside it reads as clutter.
+              No caption box — a label under a bounded glow is what made this
+              read as a pasted card. The constellation speaks for itself. */}
           <div className="hidden lg:col-span-5 lg:block">
-            <Constellation className="h-[26rem] w-full xl:h-[32rem]" />
-            <p className="text-ink-subtle mt-2 text-center text-[0.6875rem] tracking-[0.14em] uppercase">
-              {t(COPY.hero.constellationLabel)}
-            </p>
+            <Constellation className="h-[28rem] w-full xl:h-[34rem]" />
           </div>
         </div>
       </div>

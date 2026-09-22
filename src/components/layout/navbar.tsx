@@ -6,6 +6,7 @@ import { LanguageToggle } from "@/components/ui/language-toggle";
 import { useLang } from "@/components/providers/language-provider";
 import { COPY, NAV } from "@/lib/content";
 import { PillLinks } from "@/components/reactbits/PillLinks";
+import { ScrollLink } from "@/components/ui/scroll-link";
 import { cn } from "@/lib/utils";
 
 /**
@@ -57,13 +58,13 @@ export function Navbar() {
         className="shell flex h-[var(--x-nav-h)] items-center justify-between gap-6"
       >
         {/* Brand */}
-        <a
+        <ScrollLink
           href="#top"
           className="flex shrink-0 items-center rounded-md py-2"
-          aria-label="Xinet — beranda"
+          ariaLabel="Xinet — beranda"
         >
           <XinetLogo variant="wordmark" height={22} priority alt={t(COPY.hero.logoAlt)} />
-        </a>
+        </ScrollLink>
 
         {/* Desktop links — ReactBits PillNav hover animation, no floating rail */}
         <PillLinks
@@ -79,12 +80,12 @@ export function Navbar() {
             navbar never competes with the hero. */}
         <div className="hidden items-center gap-2.5 lg:flex">
           <LanguageToggle />
-          <a
+          <ScrollLink
             href="#products"
             className="bg-ink text-base hover:bg-white inline-flex h-8 items-center rounded-full px-3.5 text-[0.8125rem] font-medium transition-colors duration-300 motion-reduce:transition-none"
           >
             {t(COPY.nav.cta)}
-          </a>
+          </ScrollLink>
         </div>
 
         {/* Mobile actions */}
@@ -126,24 +127,24 @@ export function Navbar() {
         <ul className="shell flex flex-col py-3">
           {NAV.map((item) => (
             <li key={item.id}>
-              <a
+              <ScrollLink
                 href={`#${item.id}`}
-                onClick={() => setOpen(false)}
+                onNavigate={() => setOpen(false)}
                 className="text-ink-muted hover:text-ink border-line block border-b py-3.5 text-base transition-colors duration-200 last:border-0 motion-reduce:transition-none"
               >
                 {t(item.label)}
-              </a>
+              </ScrollLink>
             </li>
           ))}
         </ul>
         <div className="shell pb-5">
-          <a
+          <ScrollLink
             href="#products"
-            onClick={() => setOpen(false)}
+            onNavigate={() => setOpen(false)}
             className="bg-ink text-base flex h-10 w-full items-center justify-center rounded-full text-[0.8125rem] font-medium"
           >
             {t(COPY.nav.cta)}
-          </a>
+          </ScrollLink>
         </div>
       </div>
     </header>

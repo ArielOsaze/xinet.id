@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollLink } from "@/components/ui/scroll-link";
 
 /**
  * PillLinks — the hover animation from ReactBits PillNav, applied to ordinary
@@ -11,6 +12,9 @@ import { gsap } from "gsap";
  * header layout. This site keeps its original header (logo left, links centre,
  * actions right), so only the animation was extracted: the circle that expands
  * from the bottom edge plus the label swap.
+ *
+ * Links render through ScrollLink so clicking one scrolls without writing a `#`
+ * fragment into the address bar.
  */
 
 export type PillLinkItem = {
@@ -101,12 +105,12 @@ export function PillLinks({ items, className = "", ease = "power3.easeOut" }: Pr
     <ul className={`flex list-none items-center ${className}`}>
       {items.map((item, i) => (
         <li key={item.href}>
-          <a
+          <ScrollLink
             ref={(el) => {
               linkRefs.current[i] = el;
             }}
             href={item.href}
-            aria-label={item.ariaLabel || item.label}
+            ariaLabel={item.ariaLabel || item.label}
             onMouseEnter={() => enter(i)}
             onMouseLeave={() => leave(i)}
             onFocus={() => enter(i)}
@@ -136,7 +140,7 @@ export function PillLinks({ items, className = "", ease = "power3.easeOut" }: Pr
                 {item.label}
               </span>
             </span>
-          </a>
+          </ScrollLink>
         </li>
       ))}
     </ul>

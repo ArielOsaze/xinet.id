@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { ScrollLink } from "@/components/ui/scroll-link";
 import { cn } from "@/lib/utils";
 
 /**
@@ -58,16 +58,16 @@ export function Cta({
 
   if (href) {
     return (
-      <Link href={href} className={classes} aria-label={ariaLabel}>
+      <ScrollLink href={href} className={classes} ariaLabel={ariaLabel}>
         {children}
-      </Link>
+      </ScrollLink>
     );
   }
 
   return (
-    <a href="#contact" className={classes} aria-label={ariaLabel}>
+    <ScrollLink href="#contact" className={classes} ariaLabel={ariaLabel}>
       {children}
-    </a>
+    </ScrollLink>
   );
 }
 

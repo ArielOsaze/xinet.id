@@ -60,7 +60,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Jelajahi SayBot", en: "Explore SayBot" },
     url: "https://saybot.nexshop.cloud",
-    hue: "74 222 128",
+    hue: "96 165 250",
     shot: "/products/saybot.webp",
     shotTitle: "saybot.nexshop.cloud",
     shotAlt: {
@@ -78,7 +78,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Kenali AkunTuntas", en: "Discover AkunTuntas" },
     url: null,
-    hue: "251 191 36",
+    hue: "167 139 250",
     shot: "/products/akuntuntas.webp",
     shotTitle: "AkunTuntas — Laporan Keuangan",
     shotAlt: {
@@ -96,7 +96,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Kenali Amara", en: "Discover Amara" },
     url: null,
-    hue: "244 164 224",
+    hue: "196 181 253",
     shot: "/products/amara.webp",
     shotTitle: "Amara — AI Assistant",
     shotAlt: {
@@ -114,7 +114,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Kenali LumaWall", en: "Discover LumaWall" },
     url: null,
-    hue: "239 68 68",
+    hue: "125 211 252",
     shot: "/products/lumawall.webp",
     shotTitle: "LumaWall — Desktop Engine",
     shotAlt: {

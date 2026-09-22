@@ -88,7 +88,10 @@ export function HeroBackground() {
         // seam the parent-sized canvas produced.
         <div className="hero-veil absolute inset-0 overflow-hidden opacity-[0.45]">
           <DarkVeil
-            hueShift={196}
+            // Hue 196 lands the shader in the cyan-blue band. The stock default
+            // (0) renders warm oranges/greens, which read as a yellow aurora
+            // against this palette.
+            hueShift={205}
             noiseIntensity={0}
             scanlineIntensity={0}
             speed={0.22}
