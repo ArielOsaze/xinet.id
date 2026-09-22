@@ -2,18 +2,18 @@
 
 import { useLang } from "@/components/providers/language-provider";
 import { COPY, PRODUCTS, type Product } from "@/lib/content";
-import { ProductArtwork } from "@/components/brand/product-artwork";
+import { AppWindow } from "@/components/brand/app-window";
 import { ProductCard } from "@/components/products/product-card";
 import { Reveal } from "@/components/ui/reveal";
-import { CtaArrow } from "@/components/ui/cta";
 import { cn } from "@/lib/utils";
 
 /**
  * FeaturedProducts — the centrepiece.
  *
- * Layout: large editorial cards that alternate artwork/text sides on desktop and
- * collapse to a single stack on mobile. Each product keeps its own hue inside
- * the artwork while the frame stays Xinet's.
+ * Layout: large editorial cards that alternate sides on desktop and collapse to
+ * a single stack on mobile. Each card shows a real capture of the running
+ * product inside a macOS-style window frame, so the cards demonstrate the
+ * products instead of illustrating them.
  */
 export function FeaturedProducts() {
   const { t } = useLang();
@@ -52,14 +52,30 @@ function ProductRow({ product, index }: { product: Product; index: number }) {
         <div
           className={cn(
             "grid h-full grid-cols-1 lg:grid-cols-12",
-            // Alternate the artwork side so the grid reads editorially,
+            // Alternate the screenshot side so the grid reads editorially,
             // never like a template.
             flip && "lg:[&>*:first-child]:order-2"
           )}
         >
-          {/* Artwork panel */}
-          <div className="border-line relative min-h-[16rem] border-b lg:col-span-7 lg:min-h-[22rem] lg:border-r lg:border-b-0">
-            <ProductArtwork product={product.id} hue={product.hue} />
+          {/* Real product capture, framed like a window */}
+          <div
+            className="border-line relative flex items-center justify-center border-b p-5 sm:p-7 lg:col-span-7 lg:min-h-[24rem] lg:border-r lg:border-b-0 lg:p-9"
+            style={{ backgroundColor: "#0B0E11" }}
+          >
+            <div className="grid-bg pointer-events-none absolute inset-0 opacity-40" />
+            <div
+              className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full opacity-[0.14] blur-[70px]"
+              style={{
+                background: `radial-gradient(circle, rgb(${product.hue}) 0%, transparent 70%)`,
+              }}
+            />
+            <AppWindow
+              src={product.shot}
+              alt={t(product.shotAlt)}
+              title={product.shotTitle}
+              className="relative w-full"
+              sizes="(max-width: 1024px) 92vw, 640px"
+            />
           </div>
 
           {/* Copy panel */}

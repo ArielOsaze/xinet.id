@@ -18,7 +18,7 @@ export function EcosystemReveal() {
 
   // 12 tiles at 3 columns on desktop; 8 tiles at 2 columns on mobile so the
   // settled grid fits the viewport height without clipping rows.
-  const names = ["NexShop", "SayBot", "AkunTuntas", "AkuAI", "Xinet Labs", "Xinet"];
+  const names = ["NexShop", "SayBot", "AkunTuntas", "Xinet Labs", "Xinet"];
   const makeTiles = (count: number) =>
     Array.from({ length: count }, (_, i) => {
       const name = names[i % names.length];

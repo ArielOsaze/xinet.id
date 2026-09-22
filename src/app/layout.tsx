@@ -30,7 +30,6 @@ export const metadata: Metadata = {
     "NexShop",
     "SayBot",
     "AkunTuntas",
-    "AkuAI",
     "Indonesia",
   ],
   authors: [{ name: "Xinet", url: SITE_URL }],

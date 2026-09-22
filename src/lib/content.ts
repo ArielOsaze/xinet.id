@@ -16,6 +16,12 @@ export type Product = {
   url: string | null;
   /** Restrained per-product hue used only for the card artwork surface. */
   hue: string;
+  /** Real product screenshot shown inside the macOS-style window frame. */
+  shot: string;
+  /** Caption for the window title bar (the product's own name/domain). */
+  shotTitle: string;
+  /** Alt text describing what the screenshot actually shows. */
+  shotAlt: Bi;
 };
 
 export const NAV: { id: string; label: Bi }[] = [
@@ -37,6 +43,12 @@ export const PRODUCTS: Product[] = [
     cta: { id: "Kunjungi NexShop", en: "Visit NexShop" },
     url: "https://nexshop.cloud",
     hue: "34 199 232",
+    shot: "/products/nexshop.webp",
+    shotTitle: "nexshop.cloud",
+    shotAlt: {
+      id: "Beranda NexShop dengan katalog top up game dan tombol belanja.",
+      en: "NexShop storefront showing the game top-up catalog and shop call to action.",
+    },
   },
   {
     id: "saybot",
@@ -49,6 +61,12 @@ export const PRODUCTS: Product[] = [
     cta: { id: "Jelajahi SayBot", en: "Explore SayBot" },
     url: "https://saybot.nexshop.cloud",
     hue: "74 222 128",
+    shot: "/products/saybot.webp",
+    shotTitle: "saybot.nexshop.cloud",
+    shotAlt: {
+      id: "Halaman SayBot yang menjelaskan penyatuan WhatsApp, Telegram, Email, dan Chat Website dalam satu alur kerja.",
+      en: "SayBot landing page describing WhatsApp, Telegram, Email and Website Chat unified in one workflow.",
+    },
   },
   {
     id: "akuntuntas",
@@ -61,18 +79,12 @@ export const PRODUCTS: Product[] = [
     cta: { id: "Kenali AkunTuntas", en: "Discover AkunTuntas" },
     url: null,
     hue: "251 191 36",
-  },
-  {
-    id: "akuai",
-    name: "AkuAI",
-    category: { id: "Kecerdasan Artifisial", en: "Artificial Intelligence" },
-    description: {
-      id: "Inisiatif AI eksperimental yang berfokus pada alat digital praktis dan pengalaman yang cerdas.",
-      en: "An experimental AI initiative focused on practical digital tools and intelligent experiences.",
+    shot: "/products/akuntuntas.webp",
+    shotTitle: "AkunTuntas — Laporan Keuangan",
+    shotAlt: {
+      id: "Layar laporan laba rugi AkunTuntas dengan ringkasan pendapatan, laba, dan margin.",
+      en: "AkunTuntas income statement screen showing revenue, profit and margin summaries.",
     },
-    cta: { id: "Jelajahi AkuAI", en: "Explore AkuAI" },
-    url: null,
-    hue: "167 139 250",
   },
 ];
 
@@ -80,7 +92,6 @@ export const STRIP: string[] = [
   "NexShop",
   "SayBot",
   "AkunTuntas",
-  "AkuAI",
   "Xinet Labs",
 ];
 
@@ -151,7 +162,7 @@ export const LAB_CATEGORIES: Bi[] = [
 
 /**
  * Projects currently in the lab. These are real Xinet-built projects that sit
- * outside the four flagship products, labelled honestly by their stage.
+ * outside the flagship products, labelled honestly by their stage.
  */
 export const LAB_ITEMS: {
   name: string;
@@ -192,7 +203,6 @@ export const FOOTER_PRODUCTS: { name: string; url: string | null }[] = [
   { name: "NexShop", url: "https://nexshop.cloud" },
   { name: "SayBot", url: "https://saybot.nexshop.cloud" },
   { name: "AkunTuntas", url: null },
-  { name: "AkuAI", url: null },
 ];
 
 export const FOOTER_COMPANY: { id: string; label: Bi }[] = [

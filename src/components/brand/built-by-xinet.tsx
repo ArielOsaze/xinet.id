@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 /**
  * BuiltByXinet — reusable company signature.
  *
- * Intended to be dropped into NexShop, SayBot, AkunTuntas, AkuAI and future
+ * Intended to be dropped into NexShop, SayBot, AkunTuntas and future
  * Xinet projects. It is a quiet endorsement line, never a badge: hairline rule,
  * small caps label, no fill and no glow.
  *
