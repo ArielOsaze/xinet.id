@@ -15,12 +15,18 @@ const base =
 
 // Both solid and outlined variants carry a 1px border so the pair renders at
 // exactly the same height.
+//
+// `text-base` is NOT used here on purpose. The site defines `--color-base` in
+// its @theme block, which makes Tailwind resolve `text-base` as the COLOUR
+// `base` rather than the font-size `base`. On a filled pill that produced
+// white-on-white text (both resolved to #F5F7F8), i.e. an apparently blank
+// button. The size is set explicitly instead.
 const variants: Record<Variant, string> = {
   primary:
-    "border border-transparent bg-ink text-base px-6 py-3 hover:bg-white active:scale-[0.98] motion-reduce:active:scale-100",
+    "border border-transparent bg-ink text-[#080A0C] px-6 py-3 text-sm hover:bg-white active:scale-[0.98] motion-reduce:active:scale-100",
   secondary:
-    "border border-line-strong text-ink px-6 py-3 hover:border-white/30 hover:bg-white/[0.04] active:scale-[0.98] motion-reduce:active:scale-100",
-  quiet: "text-ink-muted hover:text-ink px-1 py-1",
+    "border border-line-strong text-ink px-6 py-3 text-sm hover:border-white/30 hover:bg-white/[0.04] active:scale-[0.98] motion-reduce:active:scale-100",
+  quiet: "text-ink-muted hover:text-ink px-1 py-1 text-sm",
 };
 
 type CtaProps = {

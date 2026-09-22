@@ -63,6 +63,59 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
   const cardsRef = useRef<HTMLElement[]>([]);
   const lastTransformsRef = useRef(new Map<number, any>());
   const isUpdatingRef = useRef(false);
+  /**
+   * Cached layout offsets, keyed by element.
+   *
+   * These MUST NOT be re-read from getBoundingClientRect() during the scroll
+   * loop. That rect includes the transform this component applied on the
+   * previous frame, so feeding it back into the pin math produces:
+   *
+   *     cardTop = U + Y
+   *     Y_next  = scrollTop - cardTop + P = (scrollTop - U + P) - Y
+   *
+   * which is a period-2 oscillator: the value flips sign around (scrollTop-U+P)/2
+   * every frame instead of settling. That was the reported card shake.
+   *
+   * So the untransformed offset is measured ONCE (while the cards carry no
+   * transform) and cached; the loop only reads from here. It is invalidated on
+   * resize and on content changes, which is when layout can actually move.
+   */
+  const offsetCacheRef = useRef(new Map<HTMLElement, number>());
+  const layoutDirtyRef = useRef(true);
+
+  /** Measure an element's offset with any transform temporarily removed. */
+  const measureOffset = useCallback(
+    (element: HTMLElement) => {
+      if (!useWindowScroll) return element.offsetTop;
+
+      const prev = element.style.transform;
+      if (prev) element.style.transform = 'none';
+      // Read the layout value, then restore before the browser can paint.
+      const top = element.getBoundingClientRect().top + window.scrollY;
+      if (prev) element.style.transform = prev;
+      return top;
+    },
+    [useWindowScroll]
+  );
+
+  /** Read the cached offset, measuring on first use or after invalidation. */
+  const getElementOffset = useCallback(
+    (element: HTMLElement) => {
+      const cache = offsetCacheRef.current;
+      const cached = cache.get(element);
+      if (cached !== undefined && !layoutDirtyRef.current) return cached;
+      const top = measureOffset(element);
+      cache.set(element, top);
+      return top;
+    },
+    [measureOffset]
+  );
+
+  /** Drop cached offsets so the next read re-measures. */
+  const invalidateOffsets = useCallback(() => {
+    offsetCacheRef.current.clear();
+    layoutDirtyRef.current = true;
+  }, []);
 
   const calculateProgress = useCallback((scrollTop: number, start: number, end: number) => {
     if (scrollTop < start) return 0;
@@ -94,18 +147,6 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     }
   }, [useWindowScroll]);
 
-  const getElementOffset = useCallback(
-    (element: HTMLElement) => {
-      if (useWindowScroll) {
-        const rect = element.getBoundingClientRect();
-        return rect.top + window.scrollY;
-      } else {
-        return element.offsetTop;
-      }
-    },
-    [useWindowScroll]
-  );
-
   const updateCardTransforms = useCallback(() => {
     if (!cardsRef.current.length || isUpdatingRef.current) return;
 
@@ -119,12 +160,17 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       ? (document.querySelector('.scroll-stack-end') as HTMLElement | null)
       : (scrollerRef.current?.querySelector('.scroll-stack-end') as HTMLElement | null);
 
+    // Read all offsets from the cache first, then clear the dirty flag. Doing it
+    // in this order means a single invalidation triggers exactly one re-measure
+    // pass, not one per card.
     const endElementTop = endElement ? getElementOffset(endElement) : 0;
+    const cardTops = cardsRef.current.map(card => (card ? getElementOffset(card) : 0));
+    layoutDirtyRef.current = false;
 
     cardsRef.current.forEach((card, i) => {
       if (!card) return;
 
-      const cardTop = getElementOffset(card);
+      const cardTop = cardTops[i];
       const triggerStart = cardTop - stackPositionPx - itemStackDistance * i;
       const triggerEnd = cardTop - scaleEndPositionPx;
       const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
@@ -139,7 +185,9 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       if (blurAmount) {
         let topCardIndex = 0;
         for (let j = 0; j < cardsRef.current.length; j++) {
-          const jCardTop = getElementOffset(cardsRef.current[j]);
+          // Use the same cached offsets as the pin math — reading the live rect
+          // here would reintroduce the feedback loop for the blur pass.
+          const jCardTop = cardTops[j];
           const jTriggerStart = jCardTop - stackPositionPx - itemStackDistance * j;
           if (scrollTop >= jTriggerStart) {
             topCardIndex = j;
@@ -305,11 +353,28 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       card.style.webkitTransform = 'translateZ(0)';
     });
 
-    setupLenis();
-
+    // Offsets were just invalidated (cards were re-declared), so re-measure now
+    // while the transforms are still neutral.
+    invalidateOffsets();
     updateCardTransforms();
 
+    setupLenis();
+
+    // A resize changes every offset, so the cache must be dropped. The scroll
+    // handler re-measures on the next frame because the dirty flag is set.
+    const onResize = () => {
+      invalidateOffsets();
+      updateCardTransforms();
+    };
+    window.addEventListener('resize', onResize);
+
+    // Web fonts landing after first paint shift text, which shifts card heights.
+    if (document.fonts) {
+      document.fonts.ready.then(onResize).catch(() => {});
+    }
+
     return () => {
+      window.removeEventListener('resize', onResize);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -319,6 +384,8 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       stackCompletedRef.current = false;
       cardsRef.current = [];
       transformsCache.clear();
+      offsetCacheRef.current.clear();
+      layoutDirtyRef.current = true;
       isUpdatingRef.current = false;
     };
   }, [
@@ -334,7 +401,8 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     useWindowScroll,
     onStackComplete,
     setupLenis,
-    updateCardTransforms
+    updateCardTransforms,
+    invalidateOffsets
   ]);
 
   return (

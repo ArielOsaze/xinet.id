@@ -92,7 +92,17 @@ type Mote = {
 };
 
 /** Static background stars: fixed positions, only the twinkle phase varies. */
-type FieldStar = { x: number; y: number; r: number; a: number; phase: number };
+type FieldStar = {
+  x: number;
+  y: number;
+  r: number;
+  a: number;
+  phase: number;
+  /** 0 = far, 1 = mid, 2 = near. Drives halo + colour. */
+  tier: number;
+  /** A few genuinely warm stars, as in a real field. */
+  warm: boolean;
+};
 
 export function Constellation({ className }: { className?: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -144,18 +154,22 @@ export function Constellation({ className }: { className?: string }) {
         };
       });
 
-      // Field stars: fixed positions, only their twinkle phase varies. 260 of
-      // them across three brightness tiers, because a uniform field reads as
-      // noise — a real sky is dominated by faint stars with a few brighter ones.
-      field = Array.from({ length: 260 }, (_, i) => {
-        const tier = rand(i, 16);
-        const bright = tier > 0.94 ? 1 : tier > 0.72 ? 0.62 : 0.34;
+      // Field stars: fixed positions, only their twinkle phase varies. 300
+      // across three depth tiers, because a uniform field reads as noise — a
+      // real sky is dominated by faint stars with a few brighter ones.
+      field = Array.from({ length: 300 }, (_, i) => {
+        const t = rand(i, 16);
+        const tier = t > 0.93 ? 2 : t > 0.7 ? 1 : 0;
+        const scale = tier === 2 ? 1 : tier === 1 ? 0.6 : 0.32;
         return {
           x: rand(i, 11),
           y: rand(i, 12),
-          r: (0.3 + rand(i, 13) * 1.05) * bright,
-          a: (0.14 + rand(i, 14) * 0.55) * (0.5 + bright * 0.75),
+          r: (0.32 + rand(i, 13) * 1.15) * scale,
+          a: (0.16 + rand(i, 14) * 0.58) * (tier === 2 ? 1 : tier === 1 ? 0.72 : 0.44),
           phase: rand(i, 15) * Math.PI * 2,
+          tier,
+          // ~7% of stars carry a warm cast, matching a real mixed field.
+          warm: rand(i, 17) > 0.93,
         };
       });
     };
@@ -247,17 +261,31 @@ export function Constellation({ className }: { className?: string }) {
       ctx.fillRect(0, 0, w, h);
 
       // --- background field stars ----------------------------------------
+      // Three depth layers. Distant stars are small, dim and cool; nearer ones
+      // are brighter with a faint warm cast. That variation is what makes the
+      // field read as depth instead of as uniform noise.
       for (const s of field) {
         const tw = still ? 1 : 0.55 + 0.45 * Math.sin(time * 0.7 + s.phase);
-        ctx.fillStyle = `rgba(226, 238, 248, ${s.a * tw})`;
+        const px2 = s.x * w + pointer.x * 0.35;
+        const py2 = s.y * h + pointer.y * 0.35;
+        const a = s.a * tw;
+
+        if (s.tier === 2) {
+          // Near star: soft halo so it does not look like a dead pixel.
+          const halo = ctx.createRadialGradient(px2, py2, 0, px2, py2, s.r * 3.4);
+          halo.addColorStop(0, `rgba(214, 232, 255, ${a * 0.5})`);
+          halo.addColorStop(1, "rgba(214, 232, 255, 0)");
+          ctx.fillStyle = halo;
+          ctx.beginPath();
+          ctx.arc(px2, py2, s.r * 3.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = s.warm
+          ? `rgba(255, 226, 200, ${a})`
+          : `rgba(214, 230, 250, ${a})`;
         ctx.beginPath();
-        ctx.arc(
-          s.x * w + pointer.x * 0.35,
-          s.y * h + pointer.y * 0.35,
-          s.r,
-          0,
-          Math.PI * 2
-        );
+        ctx.arc(px2, py2, s.r, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -292,7 +320,6 @@ export function Constellation({ className }: { className?: string }) {
       // than as a wireframe.
       const lineProgress = still ? 1 : easeOut(clamp01((time - 1.4) / 1.5));
       if (lineProgress > 0) {
-        ctx.lineWidth = 1;
         ctx.globalAlpha = lineProgress * 0.9;
         for (const [a, b] of AXES) {
           const p1 = project(STARS[a].x, STARS[a].y);
@@ -301,7 +328,19 @@ export function Constellation({ className }: { className?: string }) {
           grad.addColorStop(0, rgba(STARS[a].halo, 0.5));
           grad.addColorStop(0.5, "rgba(34, 199, 232, 0.16)");
           grad.addColorStop(1, rgba(STARS[b].halo, 0.5));
+
+          // Two passes: a wide soft stroke under a crisp thin one. A single flat
+          // 1px line reads as a wireframe; the halo makes it read as light.
           ctx.strokeStyle = grad;
+          ctx.lineWidth = 3.2;
+          ctx.globalAlpha = lineProgress * 0.22;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = lineProgress * 0.9;
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
@@ -340,19 +379,43 @@ export function Constellation({ className }: { className?: string }) {
         ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Diffraction spikes on the two brightest stars only — the four-point
-        // flare a bright star shows in a photograph. Drawing it on all five
-        // would read as sparkle clip-art rather than as a night sky.
-        if (f > 0.55) {
-          const spike = glowRadius * 1.45;
-          ctx.strokeStyle = rgba(s.color, 0.3 * a * f);
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(x - spike, y);
-          ctx.lineTo(x + spike, y);
-          ctx.moveTo(x, y - spike);
-          ctx.lineTo(x, y + spike);
-          ctx.stroke();
+        // Diffraction spikes. Every principal star gets them, with the length
+        // scaled by flux — the two brightest have long, obvious flares and the
+        // faint ones a shorter but still clearly visible one. Giving them to all
+        // five is what balances the composition; drawing them on two stars made
+        // the other three look unfinished and pulled all the weight to one side.
+        //
+        // The spike length is driven by the CARD's own scale, not glowRadius:
+        // glowRadius is already multiplied by flux, so using it here made the
+        // faint stars' spikes collapse to sub-pixel and vanish.
+        {
+          const spikeBase = Math.min(w, h) * 0.38;
+          const spike = spikeBase * (0.16 + f * 0.5);
+          const spikeAlpha = (0.16 + f * 0.3) * a;
+          if (spikeAlpha > 0.02) {
+            ctx.strokeStyle = rgba(s.color, spikeAlpha);
+            ctx.lineWidth = f > 0.5 ? 1.1 : 0.85;
+            ctx.beginPath();
+            ctx.moveTo(x - spike, y);
+            ctx.lineTo(x + spike, y);
+            ctx.moveTo(x, y - spike);
+            ctx.lineTo(x, y + spike);
+            ctx.stroke();
+
+            // Diagonal spikes on the brightest pair only, so they still read as
+            // the dominant stars without being the only ones with flares.
+            if (f > 0.55) {
+              const d = spike * 0.55;
+              ctx.strokeStyle = rgba(s.color, spikeAlpha * 0.55);
+              ctx.lineWidth = 0.7;
+              ctx.beginPath();
+              ctx.moveTo(x - d, y - d);
+              ctx.lineTo(x + d, y + d);
+              ctx.moveTo(x + d, y - d);
+              ctx.lineTo(x - d, y + d);
+              ctx.stroke();
+            }
+          }
         }
 
         // Core: a small saturated disc so the colour reads (a pure-white core

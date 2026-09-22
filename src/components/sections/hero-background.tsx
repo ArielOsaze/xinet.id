@@ -86,19 +86,43 @@ export function HeroBackground() {
         // The shader is a full-bleed veil, so it must not be clipped to a
         // rounded container. `inset-0` + explicit w/h avoids the visible vertical
         // seam the parent-sized canvas produced.
-        <div className="hero-veil absolute inset-0 overflow-hidden opacity-[0.45]">
-          <DarkVeil
-            // Hue 196 lands the shader in the cyan-blue band. The stock default
-            // (0) renders warm oranges/greens, which read as a yellow aurora
-            // against this palette.
-            hueShift={205}
-            noiseIntensity={0}
-            scanlineIntensity={0}
-            speed={0.22}
-            scanlineFrequency={0}
-            warpAmount={0.35}
-            resolutionScale={0.6}
+        //
+        // Colour: the shader's own `hueShift` ADDS to each pixel's hue rather
+        // than setting it, so a warm source pixel plus a shift lands somewhere
+        // unpredictable — the field ends up multi-hued and the warm/green
+        // patches read as a foreign aurora.
+        //
+        // CSS `hue-rotate` was not enough: measured on the rendered canvas it
+        // still left ~10k green pixels (hue ~140), because the shader's output
+        // spans a wide hue range and a single rotation cannot collapse it.
+        //
+        // `mix-blend-mode: color` is the reliable fix: it takes LIGHTNESS from
+        // the shader (so the structure and motion survive) and HUE+SATURATION
+        // from the element behind it. The layer below is painted with the brand
+        // cyan, so every pixel of the veil is forced into the cyan-blue band no
+        // matter what the shader emits.
+        <div className="hero-veil absolute inset-0 overflow-hidden">
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(140deg, rgba(34,199,232,0.30) 0%, rgba(96,165,250,0.20) 45%, rgba(167,139,250,0.14) 100%)",
+            }}
           />
+          <div
+            className="absolute inset-0 opacity-[0.5]"
+            style={{ mixBlendMode: "color" }}
+          >
+            <DarkVeil
+              hueShift={0}
+              noiseIntensity={0}
+              scanlineIntensity={0}
+              speed={0.22}
+              scanlineFrequency={0}
+              warpAmount={0.35}
+              resolutionScale={0.6}
+            />
+          </div>
         </div>
       )}
 

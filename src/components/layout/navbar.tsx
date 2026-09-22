@@ -82,7 +82,7 @@ export function Navbar() {
           <LanguageToggle />
           <ScrollLink
             href="#products"
-            className="bg-ink text-base hover:bg-white inline-flex h-8 items-center rounded-full px-3.5 text-[0.8125rem] font-medium transition-colors duration-300 motion-reduce:transition-none"
+            className="bg-ink text-[#080A0C] hover:bg-white inline-flex h-8 items-center rounded-full px-3.5 text-[0.8125rem] font-medium transition-colors duration-300 motion-reduce:transition-none"
           >
             {t(COPY.nav.cta)}
           </ScrollLink>
@@ -130,7 +130,7 @@ export function Navbar() {
               <ScrollLink
                 href={`#${item.id}`}
                 onNavigate={() => setOpen(false)}
-                className="text-ink-muted hover:text-ink border-line block border-b py-3.5 text-base transition-colors duration-200 last:border-0 motion-reduce:transition-none"
+                className="text-ink-muted hover:text-ink border-line block border-b py-3.5 text-[1rem] transition-colors duration-200 last:border-0 motion-reduce:transition-none"
               >
                 {t(item.label)}
               </ScrollLink>
@@ -141,7 +141,7 @@ export function Navbar() {
           <ScrollLink
             href="#products"
             onNavigate={() => setOpen(false)}
-            className="bg-ink text-base flex h-10 w-full items-center justify-center rounded-full text-[0.8125rem] font-medium"
+            className="bg-ink text-[#080A0C] flex h-10 w-full items-center justify-center rounded-full text-[0.8125rem] font-medium"
           >
             {t(COPY.nav.cta)}
           </ScrollLink>
