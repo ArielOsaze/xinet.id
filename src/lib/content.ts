@@ -171,6 +171,15 @@ export const LAB_ITEMS: {
   url: string | null;
 }[] = [
   {
+    name: "Amara AI Assistant",
+    status: { id: "Rilis", en: "Shipped" },
+    description: {
+      id: "Pendamping desktop AI dengan avatar 3D dan percakapan suara.",
+      en: "An AI desktop companion with a 3D avatar and voice conversation.",
+    },
+    url: null,
+  },
+  {
     name: "LumaWall",
     status: { id: "Rilis", en: "Shipped" },
     description: {

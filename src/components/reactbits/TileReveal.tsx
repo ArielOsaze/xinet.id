@@ -256,13 +256,14 @@ export function TileReveal({
         <div ref={stageRef} className="absolute inset-0 grid place-items-center overflow-hidden px-5 sm:px-6">
           <div
             ref={gridRef}
-            className="grid w-full max-w-full will-change-transform"
+            className="grid will-change-transform"
             style={{
-              maxWidth: `min(${gridWidth}px, 100%)`,
+              // Size the grid from BOTH constraints: the width cap and the
+              // height budget. Using max-height alone lets the last row clip,
+              // because each tile's aspect ratio keeps its width at 100% while
+              // only its height is capped.
+              width: `min(${gridWidth}px, 100%, (76svh - ${(rows - 1) * gap}px) * ${cols} * ${tileAspect} / ${rows})`,
               gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-              // Cap the grid by viewport height too, so the settled state never
-              // pushes the first or last row off screen.
-              maxHeight: "76svh",
               gap,
             }}
           >
@@ -274,9 +275,7 @@ export function TileReveal({
                 }}
                 className="will-change-transform"
                 style={{
-                  // Prefer the supplied ratio, but never exceed the height cap.
                   aspectRatio: String(tileAspect),
-                  maxHeight: `calc((76svh - ${(rows - 1) * gap}px) / ${rows})`,
                   borderRadius: tileRadius,
                   // Start offscreen; the first frame corrects this immediately.
                   transform: "translate3d(0,0,0)",
