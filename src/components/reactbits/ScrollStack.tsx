@@ -14,7 +14,11 @@ export const ScrollStackItem: React.FC<ScrollStackItemProps> = ({ children, item
     className={`scroll-stack-card relative w-full h-80 my-8 p-12 rounded-[40px] shadow-[0_0_30px_rgba(0,0,0,0.1)] box-border origin-top will-change-transform ${itemClassName}`.trim()}
     style={{
       backfaceVisibility: 'hidden',
-      transformStyle: 'preserve-3d'
+      // NOT `preserve-3d`. Establishing a 3D rendering context here meant every
+      // descendant — including the hover glare overlay — was composited in that
+      // shared context, so a repaint in the overlay forced the card's whole
+      // subtree to be re-rasterised. Flat is both cheaper and stable.
+      transformStyle: 'flat'
     }}
   >
     {children}
@@ -174,10 +178,16 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
 
       if (hasChanged) {
         const transform = `translate3d(0, ${newTransform.translateY}px, 0) scale(${newTransform.scale}) rotate(${newTransform.rotation}deg)`;
-        const filter = newTransform.blur > 0 ? `blur(${newTransform.blur}px)` : '';
 
         card.style.transform = transform;
-        card.style.filter = filter;
+
+        // Only touch `filter` when there is actually something to clear. Writing
+        // `filter = ''` on every scroll frame invalidated the layer even though
+        // the value never changed, which is what made hover repaints collide
+        // with the scroll transform.
+        if (blurAmount) {
+          card.style.filter = newTransform.blur > 0 ? `blur(${newTransform.blur}px)` : '';
+        }
 
         lastTransformsRef.current.set(i, newTransform);
       }
@@ -285,13 +295,14 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       if (i < cards.length - 1) {
         card.style.marginBottom = `${itemDistance}px`;
       }
-      card.style.willChange = 'transform, filter';
+      // 'transform' only. Listing 'filter' here made the browser allocate a
+      // filter layer per card for a property that is never actually used
+      // (blurAmount is 0), and those layers flickered against the hover overlay.
+      card.style.willChange = 'transform';
       card.style.transformOrigin = 'top center';
       card.style.backfaceVisibility = 'hidden';
       card.style.transform = 'translateZ(0)';
       card.style.webkitTransform = 'translateZ(0)';
-      card.style.perspective = '1000px';
-      card.style.webkitPerspective = '1000px';
     });
 
     setupLenis();

@@ -1,23 +1,31 @@
 'use client';
 
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 
 /**
  * GlareHover — a single sweep of light across an element on hover.
  *
- * Hardened against the jitter the stock version produced when layered inside a
- * scroll-driven card:
+ * WHY THIS IS NOT THE STOCK IMPLEMENTATION
  *
- *  - `willChange` is set only while the sweep runs, then cleared. Leaving it on
- *    permanently promotes the element to its own compositing layer, and that
- *    promotion collides with the parent card's per-frame transform updates.
- *  - `activeRef` guards against re-entry: `mouseenter` fires again whenever the
- *    pointer crosses onto a child, which restarted the animation mid-sweep and
- *    read as flicker.
- *  - The wrapper is `block`, not `grid place-items-center`. As a grid container
- *    it re-measured its child on every hover frame.
- *  - `borderRadius` is applied to the overlay too, so the sweep follows the
- *    card's rounded corners instead of painting square ones.
+ * The published version animates `background-position` on a gradient. That is a
+ * *paint* animation: every frame repaints the overlay. Inside a scroll-driven
+ * card that caused the reported "card shakes when the cursor is near the top
+ * edge" bug, through a chain of three effects:
+ *
+ *   1. A paint animation on a layer whose parent is being transformed forces the
+ *      compositor to re-promote that layer each frame.
+ *   2. `void el.offsetWidth` forced a synchronous layout flush on every
+ *      `mouseenter`. Near a card edge the pointer crosses in and out repeatedly
+ *      as the stack settles, so that flush fired in a burst.
+ *   3. Toggling `will-change` on enter and clearing it on leave asked the browser
+ *      to create and destroy a composited layer on every pass.
+ *
+ * The sweep here is a `transform: translate3d()` on an oversized gradient band.
+ * Transform animations run entirely on the compositor: they never repaint, never
+ * touch layout, and so leave the card's own transform alone. It is driven with
+ * the Web Animations API rather than a CSS transition, which means no forced
+ * reflow is needed to (re)start it, and `reverse()` plays it back smoothly when
+ * the pointer leaves mid-sweep instead of snapping.
  */
 
 interface GlareHoverProps {
@@ -36,6 +44,11 @@ interface GlareHoverProps {
   className?: string;
   style?: React.CSSProperties;
 }
+
+/** Where the band rests: fully off one side. Both ends sit outside the card, so
+ *  an interrupted sweep can never freeze a band in the middle of it. */
+const SWEEP_FROM = 'translate3d(-62%, 0, 0)';
+const SWEEP_TO = 'translate3d(62%, 0, 0)';
 
 const GlareHover: React.FC<GlareHoverProps> = ({
   width = 'auto',
@@ -68,62 +81,63 @@ const GlareHover: React.FC<GlareHoverProps> = ({
   }
 
   const overlayRef = useRef<HTMLDivElement | null>(null);
-  const activeRef = useRef(false);
-  const releaseTimer = useRef<number | null>(null);
+  const animRef = useRef<Animation | null>(null);
 
   const animateIn = useCallback(() => {
     const el = overlayRef.current;
-    if (!el || activeRef.current) return;
-    activeRef.current = true;
+    if (!el || typeof el.animate !== 'function') return;
 
-    if (releaseTimer.current) {
-      window.clearTimeout(releaseTimer.current);
-      releaseTimer.current = null;
-    }
+    // A fresh sweep per entry. Cancelling first also clears a sweep that was
+    // reversed halfway, so rapid enter/leave cannot stack animations.
+    animRef.current?.cancel();
 
-    el.style.willChange = 'background-position';
-    el.style.transition = 'none';
-    el.style.backgroundPosition = '-100% -100%, 0 0';
-
-    // Commit the reset before starting the transition, otherwise the browser
-    // coalesces both writes and no sweep is visible.
-    void el.offsetWidth;
-
-    el.style.transition = `background-position ${transitionDuration}ms ease`;
-    el.style.backgroundPosition = '100% 100%, 0 0';
+    animRef.current = el.animate(
+      [{ transform: SWEEP_FROM }, { transform: SWEEP_TO }],
+      {
+        duration: transitionDuration,
+        easing: 'cubic-bezier(0.22, 0.61, 0.24, 1)',
+        fill: 'forwards'
+      }
+    );
   }, [transitionDuration]);
 
   const animateOut = useCallback(() => {
-    const el = overlayRef.current;
-    if (!el) return;
-    activeRef.current = false;
+    const anim = animRef.current;
+    if (!anim) return;
+    // playOnce means the sweep stays where it landed.
+    if (playOnce) return;
 
-    el.style.transition = playOnce
-      ? 'none'
-      : `background-position ${transitionDuration}ms ease`;
-    el.style.backgroundPosition = '-100% -100%, 0 0';
+    // Play back from wherever the sweep currently is, so leaving mid-flight
+    // eases out rather than snapping. Still transform-only.
+    try {
+      anim.reverse();
+    } catch {
+      anim.cancel();
+    }
+  }, [playOnce]);
 
-    // Drop the compositing hint once the sweep has finished.
-    if (releaseTimer.current) window.clearTimeout(releaseTimer.current);
-    releaseTimer.current = window.setTimeout(() => {
-      if (overlayRef.current && !activeRef.current) {
-        overlayRef.current.style.willChange = 'auto';
-      }
-    }, transitionDuration + 60);
-  }, [playOnce, transitionDuration]);
+  useEffect(() => {
+    return () => {
+      animRef.current?.cancel();
+      animRef.current = null;
+    };
+  }, []);
 
   const overlayStyle: React.CSSProperties = {
     position: 'absolute',
-    inset: 0,
+    // Oversized so the rotated band still covers the card at both extremes.
+    inset: '-50%',
     background: `linear-gradient(${glareAngle}deg,
-        hsla(0,0%,0%,0) 60%,
-        ${rgba} 70%,
-        hsla(0,0%,0%,0) 100%)`,
-    backgroundSize: `${glareSize}% ${glareSize}%, 100% 100%`,
+        hsla(0,0%,0%,0) 42%,
+        ${rgba} 50%,
+        hsla(0,0%,0%,0) 58%)`,
+    backgroundSize: `${glareSize}% ${glareSize}%`,
     backgroundRepeat: 'no-repeat',
-    backgroundPosition: '-100% -100%, 0 0',
     pointerEvents: 'none',
-    borderRadius
+    transform: SWEEP_FROM,
+    // Flatten this subtree: the card may sit inside a 3D rendering context, and
+    // an overlay that inherits it is what makes the sweep shimmer.
+    transformStyle: 'flat'
   };
 
   return (
@@ -135,6 +149,7 @@ const GlareHover: React.FC<GlareHoverProps> = ({
         background,
         borderRadius,
         borderColor,
+        transformStyle: 'flat',
         ...style
       }}
       onMouseEnter={animateIn}
