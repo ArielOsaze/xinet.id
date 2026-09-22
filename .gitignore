@@ -43,4 +43,5 @@ next-env.d.ts
 # local scratch (not for deploy)
 /.rb-tmp
 /.npmrc-clean
+/.shots
 

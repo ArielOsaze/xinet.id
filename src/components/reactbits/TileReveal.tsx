@@ -46,6 +46,11 @@ const FLY_WINDOW = 0.28;
 type TileRevealProps = {
   /** Tile surfaces, laid out row by row. */
   items: ReactNode[];
+  /**
+   * Optional reduced set for narrow screens. Fewer rows keep the settled grid
+   * inside the viewport instead of clipping the top and bottom rows.
+   */
+  mobileItems?: ReactNode[];
   /** Stays centred over the tiles for the whole sequence. */
   headline?: ReactNode;
   /** Revealed once the tiles have cleared the stage. */
@@ -54,7 +59,7 @@ type TileRevealProps = {
   gap?: number;
   /** Maximum grid width in px; shrinks with the viewport. */
   gridWidth?: number;
-  /** Width-to-height ratio of each tile. */
+  /** Width-to-height ratio of each tile (used when the grid is height-capped). */
   tileAspect?: number;
   tileRadius?: number;
   direction?: "alternate" | "top" | "bottom";
@@ -71,6 +76,7 @@ type TileRevealProps = {
 
 export function TileReveal({
   items,
+  mobileItems,
   headline,
   children,
   columns = 3,
@@ -94,6 +100,7 @@ export function TileReveal({
 
   const [armed, setArmed] = useState(false);
   const [cols, setCols] = useState(columns);
+  const [isNarrow, setIsNarrow] = useState(false);
 
   // Arm the sequence before paint so nothing flashes.
   useIsomorphicLayoutEffect(() => {
@@ -104,14 +111,20 @@ export function TileReveal({
   // Fewer columns on small screens keeps tiles legible and the fly-in readable.
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
-    const apply = () => setCols(mq.matches ? columns : Math.min(2, columns));
+    const apply = () => {
+      setIsNarrow(!mq.matches);
+      setCols(mq.matches ? columns : Math.min(2, columns));
+    };
     apply();
     mq.addEventListener("change", apply);
     return () => mq.removeEventListener("change", apply);
   }, [columns]);
 
-  const rows = Math.max(1, Math.ceil(items.length / cols));
-  const lastOrder = Math.max(1, items.length - 1);
+  // Narrow screens use the reduced tile set so the settled grid fits vertically.
+  const activeItems = isNarrow && mobileItems ? mobileItems : items;
+
+  const rows = Math.max(1, Math.ceil(activeItems.length / cols));
+  const lastOrder = Math.max(1, activeItems.length - 1);
 
   /** Write one frame of the sequence to the DOM. */
   const apply = useCallback(() => {
@@ -140,7 +153,7 @@ export function TileReveal({
     const clearEased = easeInOutCubic(clearP);
     const tileFade = 1 - clamp01((clearP - 0.45) / 0.55);
 
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < activeItems.length; i++) {
       const el = tileRefs.current[i];
       if (!el) continue;
 
@@ -189,7 +202,7 @@ export function TileReveal({
       contentRef.current.style.transform = `translate3d(0, ${(1 - contentEased) * 18}px, 0)`;
       contentRef.current.style.pointerEvents = contentEased < 0.5 ? "none" : "auto";
     }
-  }, [cols, direction, items.length, lastOrder, rows, spread, stagger, zoom]);
+  }, [activeItems.length, cols, direction, lastOrder, rows, spread, stagger, zoom]);
 
   useEffect(() => {
     if (!armed) return;
@@ -238,7 +251,8 @@ export function TileReveal({
     >
       <div className="sticky top-0 h-svh overflow-hidden">
         {/* Stage. `overflow-hidden` + a width cap stop tiles from spilling past
-            the viewport while they are still flying in. */}
+            the viewport while they are still flying in. Tiles are sized so the
+            settled grid fits the viewport height without clipping rows. */}
         <div ref={stageRef} className="absolute inset-0 grid place-items-center overflow-hidden px-5 sm:px-6">
           <div
             ref={gridRef}
@@ -246,10 +260,13 @@ export function TileReveal({
             style={{
               maxWidth: `min(${gridWidth}px, 100%)`,
               gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+              // Cap the grid by viewport height too, so the settled state never
+              // pushes the first or last row off screen.
+              maxHeight: "76svh",
               gap,
             }}
           >
-            {items.map((item, i) => (
+            {activeItems.map((item, i) => (
               <div
                 key={i}
                 ref={(el) => {
@@ -257,7 +274,9 @@ export function TileReveal({
                 }}
                 className="will-change-transform"
                 style={{
+                  // Prefer the supplied ratio, but never exceed the height cap.
                   aspectRatio: String(tileAspect),
+                  maxHeight: `calc((76svh - ${(rows - 1) * gap}px) / ${rows})`,
                   borderRadius: tileRadius,
                   // Start offscreen; the first frame corrects this immediately.
                   transform: "translate3d(0,0,0)",

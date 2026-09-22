@@ -16,19 +16,25 @@ import { cn } from "@/lib/utils";
 export function EcosystemReveal() {
   const { t } = useLang();
 
-  // Repeat the product names enough times to fill the grid at every breakpoint.
+  // 12 tiles at 3 columns on desktop; 8 tiles at 2 columns on mobile so the
+  // settled grid fits the viewport height without clipping rows.
   const names = ["NexShop", "SayBot", "AkunTuntas", "AkuAI", "Xinet Labs", "Xinet"];
-  const tiles = Array.from({ length: 12 }, (_, i) => {
-    const name = names[i % names.length];
-    const product = PRODUCTS.find((p) => p.name === name);
-    const hue = product?.hue ?? "122 131 140";
-    return <TileSurface key={i} label={name} hue={hue} />;
-  });
+  const makeTiles = (count: number) =>
+    Array.from({ length: count }, (_, i) => {
+      const name = names[i % names.length];
+      const product = PRODUCTS.find((p) => p.name === name);
+      const hue = product?.hue ?? "122 131 140";
+      return <TileSurface key={i} label={name} hue={hue} />;
+    });
+
+  const tiles = makeTiles(12);
+  const mobileTiles = makeTiles(8);
 
   return (
     <section id="ecosystem" className="relative">
       <TileReveal
         items={tiles}
+        mobileItems={mobileTiles}
         columns={3}
         gap={16}
         gridWidth={820}
