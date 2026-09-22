@@ -78,12 +78,13 @@ export function Navbar() {
           ))}
         </ul>
 
-        {/* Desktop actions */}
-        <div className="hidden items-center gap-3 lg:flex">
+        {/* Desktop actions — deliberately lighter than the page CTAs so the
+            navbar never competes with the hero. */}
+        <div className="hidden items-center gap-2.5 lg:flex">
           <LanguageToggle />
           <a
             href="#products"
-            className="bg-ink text-base hover:bg-white inline-flex items-center rounded-full px-4.5 py-2 text-sm font-medium transition-colors duration-300 motion-reduce:transition-none"
+            className="bg-ink text-base hover:bg-white inline-flex h-8 items-center rounded-full px-3.5 text-[0.8125rem] font-medium transition-colors duration-300 motion-reduce:transition-none"
           >
             {t(COPY.nav.cta)}
           </a>
@@ -98,7 +99,7 @@ export function Navbar() {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? t(COPY.nav.menuClose) : t(COPY.nav.menuOpen)}
-            className="border-line text-ink hover:bg-white/[0.04] flex size-10 items-center justify-center rounded-full border transition-colors duration-200 motion-reduce:transition-none"
+            className="border-line text-ink hover:bg-white/[0.04] flex size-9 items-center justify-center rounded-full border transition-colors duration-200 motion-reduce:transition-none"
           >
             <span className="relative block h-3 w-4" aria-hidden="true">
               <span
@@ -142,7 +143,7 @@ export function Navbar() {
           <a
             href="#products"
             onClick={() => setOpen(false)}
-            className="bg-ink text-base flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium"
+            className="bg-ink text-base flex h-10 w-full items-center justify-center rounded-full text-[0.8125rem] font-medium"
           >
             {t(COPY.nav.cta)}
           </a>

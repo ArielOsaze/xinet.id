@@ -62,7 +62,7 @@
   --x-accent-soft: rgba(34, 199, 232, 0.14);
 
   --radius: 0.625rem;
-  --x-nav-h: 4.5rem;
+  --x-nav-h: 4rem;
   --x-gutter: clamp(1.25rem, 5vw, 5rem);
   --x-max: 78rem;
 }
