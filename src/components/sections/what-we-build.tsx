@@ -3,10 +3,15 @@
 import { useLang } from "@/components/providers/language-provider";
 import { CAPABILITIES, COPY } from "@/lib/content";
 import { Reveal } from "@/components/ui/reveal";
+import PixelCard from "@/components/reactbits/PixelCard";
 
 /**
  * WhatWeBuild — capabilities expressed through numbering and typography rather
- * than icons. Hover only shifts colour and a hairline rule; nothing moves.
+ * than icons.
+ *
+ * Each cell is a ReactBits PixelCard: a canvas of pixels that expands on hover
+ * or keyboard focus. The pixel colour is set per cell so the six cards read as
+ * one family rather than six different effects.
  */
 export function WhatWeBuild() {
   const { t } = useLang();
@@ -20,26 +25,31 @@ export function WhatWeBuild() {
         </h2>
       </Reveal>
 
-      {/* Container owns top/left rules; each cell owns bottom/right. This stays
-          correct at every column count without nth-child gymnastics. */}
-      <div className="border-line grid grid-cols-1 border-t border-l sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CAPABILITIES.map((cap, i) => (
-          <Reveal
-            key={cap.n}
-            delay={i * 50}
-            className="border-line group hover:bg-white/[0.02] relative border-r border-b p-7 transition-colors duration-500 motion-reduce:transition-none"
-          >
-            <span className="text-ink-subtle group-hover:text-accent font-mono text-[0.6875rem] tracking-[0.1em] transition-colors duration-500 motion-reduce:transition-none">
-              {cap.n}
-            </span>
+          <Reveal key={cap.n} delay={i * 50}>
+            <PixelCard
+              // Restrained palette: cyan accent for the first three, neutral for
+              // the rest, so the grid does not turn into a colour wheel.
+              variant={i < 3 ? "blue" : "default"}
+              gap={7}
+              speed={38}
+              className="!aspect-auto !h-full !w-full !min-h-[13.5rem] !place-items-stretch !rounded-xl !border-[var(--x-line)] !bg-[#0B0E11] !p-7"
+            >
+              <div className="relative z-[1] flex h-full flex-col">
+                <span className="text-ink-subtle font-mono text-[0.6875rem] tracking-[0.1em]">
+                  {cap.n}
+                </span>
 
-            <h3 className="text-ink mt-5 text-[1.0625rem] font-medium tracking-[-0.015em]">
-              {t(cap.title)}
-            </h3>
+                <h3 className="text-ink mt-5 text-[1.0625rem] font-medium tracking-[-0.015em]">
+                  {t(cap.title)}
+                </h3>
 
-            <p className="text-ink-muted mt-2.5 max-w-xs text-sm leading-relaxed">
-              {t(cap.description)}
-            </p>
+                <p className="text-ink-muted mt-2.5 max-w-xs text-sm leading-relaxed">
+                  {t(cap.description)}
+                </p>
+              </div>
+            </PixelCard>
           </Reveal>
         ))}
       </div>

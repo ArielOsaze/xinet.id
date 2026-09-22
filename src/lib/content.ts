@@ -86,12 +86,50 @@ export const PRODUCTS: Product[] = [
       en: "AkunTuntas income statement screen showing revenue, profit and margin summaries.",
     },
   },
+  {
+    id: "amara",
+    name: "Amara AI Assistant",
+    category: { id: "Kecerdasan Artifisial", en: "Artificial Intelligence" },
+    description: {
+      id: "Pendamping desktop AI dengan avatar 3D yang bisa diajak bicara dengan suara.",
+      en: "An AI desktop companion with a 3D avatar you can talk to by voice.",
+    },
+    cta: { id: "Kenali Amara", en: "Discover Amara" },
+    url: null,
+    hue: "244 164 224",
+    shot: "/products/amara.webp",
+    shotTitle: "Amara — AI Assistant",
+    shotAlt: {
+      id: "Aplikasi Amara AI Assistant menampilkan avatar 3D dan panel percakapan.",
+      en: "Amara AI Assistant app showing its 3D avatar and chat panel.",
+    },
+  },
+  {
+    id: "lumawall",
+    name: "LumaWall",
+    category: { id: "Alat Desktop", en: "Desktop Tools" },
+    description: {
+      id: "Mesin wallpaper hidup untuk Windows dengan katalog multi-monitor.",
+      en: "A live wallpaper engine for Windows with a multi-monitor catalog.",
+    },
+    cta: { id: "Kenali LumaWall", en: "Discover LumaWall" },
+    url: null,
+    hue: "239 68 68",
+    shot: "/products/lumawall.webp",
+    shotTitle: "LumaWall — Desktop Engine",
+    shotAlt: {
+      id: "Aplikasi LumaWall menampilkan galeri wallpaper dan pengaturan monitor.",
+      en: "LumaWall app showing its wallpaper gallery and monitor controls.",
+    },
+  },
 ];
 
 export const STRIP: string[] = [
   "NexShop",
   "SayBot",
   "AkunTuntas",
+  "Amara",
+  "LumaWall",
   "Xinet Labs",
 ];
 

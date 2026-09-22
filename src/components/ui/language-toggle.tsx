@@ -1,47 +1,37 @@
 "use client";
 
 import { useLang } from "@/components/providers/language-provider";
-import { COPY } from "@/lib/content";
-import { cn } from "@/lib/utils";
+import { COPY, type Lang } from "@/lib/content";
+import RubberSegment from "@/components/reactbits/RubberSegment";
 
 /**
- * Compact ID / EN switch. Rendered as a radio group so the current language is
- * exposed to assistive tech instead of being a purely visual toggle.
+ * Language toggle built on ReactBits RubberSegment.
  *
- * Deliberately small: 24px tall, a step below the nav CTA in weight so the CTA
- * stays the primary action. Each option is 24px tall and ≥24px wide, which is
- * the WCAG 2.2 minimum target size — going smaller would start failing that.
+ * RubberSegment gives the thumb a rubber-band feel: it stretches across the gap
+ * while switching and squashes onto the target slot, and it can be dragged. Its
+ * `sm` preset keeps the whole control at 28px tall — visually below the nav CTA
+ * so the CTA stays the primary action.
  */
 export function LanguageToggle({ className }: { className?: string }) {
   const { lang, setLang, t } = useLang();
 
   return (
-    <div
-      role="radiogroup"
+    <RubberSegment
+      items={[
+        { value: "id", label: "ID" },
+        { value: "en", label: "EN" },
+      ]}
+      value={lang}
+      onChange={(v: string) => setLang(v as Lang)}
+      size="sm"
+      equalSlots
+      trackColor="rgba(255,255,255,0.04)"
+      thumbColor="#f5f7f8"
+      textColor="#7a838c"
+      activeTextColor="#080a0c"
+      radius={999}
       aria-label={t(COPY.nav.langLabel)}
-      className={cn(
-        "border-line flex h-6 items-center gap-px rounded-full border p-px",
-        className
-      )}
-    >
-      {(["id", "en"] as const).map((code) => {
-        const active = lang === code;
-        return (
-          <button
-            key={code}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            onClick={() => setLang(code)}
-            className={cn(
-              "flex h-full min-w-[26px] items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-semibold tracking-[0.05em] uppercase transition-colors duration-200 motion-reduce:transition-none",
-              active ? "bg-ink text-base" : "text-ink-subtle hover:text-ink"
-            )}
-          >
-            {code}
-          </button>
-        );
-      })}
-    </div>
+      className={className}
+    />
   );
 }
