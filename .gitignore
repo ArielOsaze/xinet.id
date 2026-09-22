@@ -42,9 +42,7 @@ next-env.d.ts
 
 # local scratch (not for deploy)
 /.rb-tmp
+/.rb2
+/.rb3
 /.npmrc-clean
 /.shots
-
-
-.vercel
-.env*
