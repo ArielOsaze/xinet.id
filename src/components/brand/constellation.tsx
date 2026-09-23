@@ -298,23 +298,39 @@ export function Constellation({ className }: { className?: string }) {
         const py2 = moved.y;
         const a = s.a * tw;
 
+        const tint = s.warm ? [255, 240, 226] : [240, 244, 250];
+
         if (s.tier === 2) {
-          // Near star: soft halo so it does not look like a dead pixel.
-          const halo = ctx.createRadialGradient(px2, py2, 0, px2, py2, s.r * 3.4);
-          halo.addColorStop(0, `rgba(238, 244, 252, ${a * 0.5})`);
-          halo.addColorStop(1, "rgba(238, 244, 252, 0)");
+          // Near star: a Moffat halo, matching the principal stars' light
+          // profile. The old version was a two-stop radial gradient — a flat
+          // disc that faded once — which is the same "airbrush" tell the big
+          // stars had.
+          const hr = s.r * 4.2;
+          const hAlpha = a * 0.5;
+          const BETA2 = 2.4;
+          const ALPHA2 = hr * 0.14;
+          const halo = ctx.createRadialGradient(px2, py2, 0, px2, py2, hr);
+          for (let k = 0; k <= 8; k++) {
+            const t = k / 8;
+            const rr = t * hr;
+            const inten = Math.pow(1 + (rr / ALPHA2) ** 2, -BETA2);
+            halo.addColorStop(t, `rgba(${tint[0]}, ${tint[1]}, ${tint[2]}, ${(inten * hAlpha).toFixed(4)})`);
+          }
           ctx.fillStyle = halo;
           ctx.beginPath();
-          ctx.arc(px2, py2, s.r * 3.4, 0, Math.PI * 2);
+          ctx.arc(px2, py2, hr, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Near-white, with only a hint of warmth on the few stars that carry it.
-        ctx.fillStyle = s.warm
-          ? `rgba(255, 240, 226, ${a})`
-          : `rgba(240, 244, 250, ${a})`;
+        // The star itself: a tiny gradient so its rim is soft rather than a hard
+        // circle. At 0.3-1.5px a solid arc reads as a dead pixel.
+        const dot = ctx.createRadialGradient(px2, py2, 0, px2, py2, s.r * 1.5);
+        dot.addColorStop(0, `rgba(255, 255, 255, ${a})`);
+        dot.addColorStop(0.5, `rgba(${tint[0]}, ${tint[1]}, ${tint[2]}, ${a * 0.85})`);
+        dot.addColorStop(1, `rgba(${tint[0]}, ${tint[1]}, ${tint[2]}, 0)`);
+        ctx.fillStyle = dot;
         ctx.beginPath();
-        ctx.arc(px2, py2, s.r, 0, Math.PI * 2);
+        ctx.arc(px2, py2, s.r * 1.5, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -407,21 +423,90 @@ export function Constellation({ className }: { className?: string }) {
         const coreRadius = 1.1 + f * 2.6;
         // `heat` widens the halo and brightens the core without moving the
         // star, so the layout stays exactly as designed.
-        const glowRadius = (9 + f * 34) * (0.55 + 0.45 * p) * (1 + heat * 0.55);
+        //
+        // Wider than before (was 9 + f*34): a Moffat profile's long faint tail is
+        // what makes a star look like it is burning, and the old radius was
+        // tuned for a gradient that reached zero at the rim. The core stays the
+        // same size because coreRadius is separate.
+        const glowRadius = (16 + f * 54) * (0.55 + 0.45 * p) * (1 + heat * 0.55);
 
         // Shimmer: slow, shallow, each star on its own phase.
         const shimmer = still ? 1 : 0.82 + 0.18 * Math.sin(time * 0.9 + i * 1.7);
         const a = p * shimmer * (1 + heat * 0.5);
 
-        // Outer halo, in the star's own scattered-light colour.
+        // Outer halo: a Moffat profile, not a smooth disc.
+        //
+        // The previous version was a radial gradient with four evenly spaced
+        // stops, which draws a perfectly circular disc that fades evenly. That
+        // is an airbrush, and it is why the stars read as digital effects.
+        //
+        // Real stellar point-spread functions are fitted by a Moffat profile,
+        //     I(r) = (1 + (r/alpha)^2)^(-beta)
+        // with beta around 2-3.5: a small saturated core, a fast initial fall,
+        // then a long faint tail that keeps going to the edge. Sampling the
+        // real curve at many stops (instead of 4 hand-picked ones) is what gives
+        // the star its "burning" look and its faint outer glow.
+        /**
+         * Point-spread function, drawn in two passes.
+         *
+         *   halo : (1 + (r/rt)^2)^-beta   wide, faint  -> the scattered-light tail
+         *   core : exp(-(r/rc)^2)         tight, white -> the star itself
+         *
+         * They are separate passes because they answer to different things. The
+         * halo breathes with the shimmer; the core must be able to SATURATE.
+         * Previously one gradient did both with the peak alpha multiplied by the
+         * shimmer (0.82-1.0), so the brightest core possible was 0.855 alpha and
+         * measured 230/255 — a core that can never reach full white always reads
+         * as a soft ball, which is exactly how it looked.
+         */
+        const rt = glowRadius * 0.3;
+        const BETA = 2.4;
+        const HALO_W = 0.42;
         const glow = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
-        glow.addColorStop(0, rgba(s.color, 0.5 * a));
-        glow.addColorStop(0.28, rgba(s.halo, 0.2 * a));
-        glow.addColorStop(0.6, rgba(s.halo, 0.06 * a));
-        glow.addColorStop(1, rgba(s.halo, 0));
+        for (let i = 0; i <= 20; i++) {
+          const t = i / 20;
+          const rr = t * glowRadius;
+          // Pure Moffat, with NO floor term.
+          //
+          // An earlier version added a constant (`HALO_W + ...`) to stop the
+          // halo vanishing at the rim. That constant was a FLOOR: every radius
+          // got at least 0.34 alpha, so the halo rendered as a flat disc 70px
+          // across instead of a falloff — a white blob, not a star.
+          const haloPart = Math.pow(1 + (rr / rt) ** 2, -BETA);
+          const inten = Math.min(1, haloPart * HALO_W * 1.6);
+          // Hue: the star's own colour near the centre, drifting to the cooler
+          // halo colour further out, as scattered light does.
+          const mixT = Math.min(1, t * 1.5);
+          const cr = s.color[0] + (s.halo[0] - s.color[0]) * mixT;
+          const cg = s.color[1] + (s.halo[1] - s.color[1]) * mixT;
+          const cb = s.color[2] + (s.halo[2] - s.color[2]) * mixT;
+          // Last stop pinned to zero: a gradient ending at a small non-zero
+          // alpha leaves a visible rim at glowRadius.
+          const alpha = t >= 1 ? 0 : inten * a;
+          glow.addColorStop(t, `rgba(${Math.round(cr)}, ${Math.round(cg)}, ${Math.round(cb)}, ${alpha.toFixed(4)})`);
+        }
         ctx.fillStyle = glow;
         ctx.beginPath();
         ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // The core: tight and saturated to full white. Scaled by the fly-in and
+        // the cursor heat, but NOT by the shimmer — a blown-out core cannot
+        // shimmer, and letting it try is what kept it below full white.
+        const coreA = Math.min(1, p * (1 + heat * 0.25));
+        // Small: the saturated part should be a dot of a few pixels, not a disc.
+        // At 2x DPR, rc*1.5 is ~3 device px of radius, so full white covers
+        // roughly a 4px circle and the fall-off begins right away.
+        const rc = Math.max(0.55, coreRadius * 0.2);
+        const coreGrad = ctx.createRadialGradient(x, y, 0, x, y, rc * 1.5);
+        coreGrad.addColorStop(0, `rgba(255, 255, 255, ${coreA})`);
+        coreGrad.addColorStop(0.22, `rgba(255, 255, 255, ${coreA * 0.88})`);
+        coreGrad.addColorStop(0.45, rgba(s.color, coreA * 0.5));
+        coreGrad.addColorStop(0.72, rgba(s.color, coreA * 0.16));
+        coreGrad.addColorStop(1, rgba(s.color, 0));
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(x, y, rc * 1.5, 0, Math.PI * 2);
         ctx.fill();
 
         // Diffraction spikes, on the BRIGHT stars only.
@@ -439,40 +524,74 @@ export function Constellation({ className }: { className?: string }) {
           const spikeBase = Math.min(w, h) * 0.38;
           const spike = spikeBase * (0.22 + f * 0.42);
           const spikeAlpha = (0.22 + f * 0.34) * a;
-          ctx.strokeStyle = rgba(s.color, spikeAlpha);
-          ctx.lineWidth = 1.1;
-          ctx.beginPath();
-          ctx.moveTo(x - spike, y);
-          ctx.lineTo(x + spike, y);
-          ctx.moveTo(x, y - spike);
-          ctx.lineTo(x, y + spike);
-          ctx.stroke();
 
-          // Diagonals on the very brightest only, and faint: a real four-vane
+          /**
+           * One spike, drawn as a pair of tapered halves.
+           *
+           * Each half is a filled triangle that is widest at the core and comes
+           * to a point at the tip, painted with a gradient that fades to fully
+           * transparent at the tip. A single constant-width stroke ended at full
+           * opacity, which is what made the flares look pasted on.
+           */
+          const drawSpike = (dx: number, dy: number, len: number, alpha: number) => {
+            const nx = -dy, ny = dx;                 // unit normal
+            // Thinner than before (0.016 -> 0.009): a real diffraction spike is
+            // a hairline, and a wide one reads as a drawn shape.
+            const halfW = Math.max(0.4, len * 0.009);
+            const tipX = x + dx * len, tipY = y + dy * len;
+            const grad = ctx.createLinearGradient(x, y, tipX, tipY);
+            // Fades over the full length rather than dropping off early, so the
+            // tip dissolves into the background instead of ending.
+            grad.addColorStop(0, rgba(s.color, alpha));
+            grad.addColorStop(0.2, rgba(s.color, alpha * 0.5));
+            grad.addColorStop(0.55, rgba(s.color, alpha * 0.16));
+            grad.addColorStop(1, rgba(s.color, 0));
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(x + nx * halfW, y + ny * halfW);
+            ctx.lineTo(tipX, tipY);
+            ctx.lineTo(x - nx * halfW, y - ny * halfW);
+            ctx.closePath();
+            ctx.fill();
+          };
+
+          // Horizontal and vertical: the pair a four-vane support produces.
+          drawSpike(1, 0, spike, spikeAlpha);
+          drawSpike(-1, 0, spike, spikeAlpha);
+          drawSpike(0, 1, spike, spikeAlpha);
+          drawSpike(0, -1, spike, spikeAlpha);
+
+          // Diagonals on the very brightest only, and fainter: a real four-vane
           // support gives the horizontal/vertical pair the strongest spikes.
           if (f > 0.85) {
             const d = spike * 0.5;
-            ctx.strokeStyle = rgba(s.color, spikeAlpha * 0.4);
-            ctx.lineWidth = 0.7;
-            ctx.beginPath();
-            ctx.moveTo(x - d, y - d);
-            ctx.lineTo(x + d, y + d);
-            ctx.moveTo(x + d, y - d);
-            ctx.lineTo(x - d, y + d);
-            ctx.stroke();
+            const da = spikeAlpha * 0.38;
+            const inv = Math.SQRT1_2;
+            drawSpike(inv, inv, d, da);
+            drawSpike(-inv, -inv, d, da);
+            drawSpike(inv, -inv, d, da);
+            drawSpike(-inv, inv, d, da);
           }
         }
 
-        // Core: a small saturated disc so the colour reads (a pure-white core
-        // would hide Gacrux's warmth), with a tight white point inside it.
-        ctx.fillStyle = rgba(s.color, 0.85 * a);
+        // Core: a continuous gradient, not two stacked discs.
+        //
+        // Two solid arcs (a coloured one with a white one on top) leave a visible
+        // rim where the white circle ends, which reads as a drawn shape. A real
+        // saturated core blows out to white at the centre and its colour appears
+        // only as the intensity falls, so this is one gradient: white in the
+        // middle, the star's own colour at the edge, alpha reaching zero just
+        // past the core so there is no edge to see.
+        const coreR = coreRadius * 1.15;
+        const core = ctx.createRadialGradient(x, y, 0, x, y, coreR);
+        core.addColorStop(0, `rgba(255, 255, 255, ${a})`);
+        core.addColorStop(0.3, `rgba(255, 255, 255, ${a * 0.82})`);
+        core.addColorStop(0.58, rgba(s.color, a * 0.4));
+        core.addColorStop(0.82, rgba(s.color, a * 0.12));
+        core.addColorStop(1, rgba(s.color, 0));
+        ctx.fillStyle = core;
         ctx.beginPath();
-        ctx.arc(x, y, coreRadius * 1.7, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
-        ctx.beginPath();
-        ctx.arc(x, y, coreRadius * 0.72, 0, Math.PI * 2);
+        ctx.arc(x, y, coreR, 0, Math.PI * 2);
         ctx.fill();
       });
 
