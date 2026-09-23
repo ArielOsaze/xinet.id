@@ -30,17 +30,30 @@ const SoftAurora = dynamic(() => import("@/components/reactbits/SoftAurora"), {
 
 export function HeroBackground() {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [enabled, setEnabled] = useState(false);
+  const [wide, setWide] = useState(false);
+  const [finePointer, setFinePointer] = useState(false);
+  const [reduced, setReduced] = useState(false);
   const [inView, setInView] = useState(false);
 
-  // Decide once whether the animated layer is appropriate for this device.
+  /**
+   * Decide once whether the aurora layer is appropriate for this device.
+   *
+   * Reduced motion used to switch the aurora off entirely. That is the wrong
+   * trade: the visitor asked for less movement, not for a different page, and
+   * on a machine with "reduce motion" enabled the hero simply looked like the
+   * aurora was broken. It is now rendered in a still form instead — speed 0 and
+   * no mouse interaction — so the hero looks the same everywhere and only the
+   * motion is removed.
+   */
   useEffect(() => {
     const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mqWide = window.matchMedia("(min-width: 768px)");
     const mqPointer = window.matchMedia("(hover: hover) and (pointer: fine)");
 
     const evaluate = () => {
-      setEnabled(!mqReduce.matches && mqWide.matches && mqPointer.matches);
+      setReduced(mqReduce.matches);
+      setWide(mqWide.matches);
+      setFinePointer(mqPointer.matches);
     };
 
     evaluate();
@@ -75,7 +88,9 @@ export function HeroBackground() {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  const showAurora = enabled && inView && tabVisible;
+  // Rendered whenever the hero is on screen and the device can handle a canvas.
+  // Motion is handled by the props below, not by unmounting the layer.
+  const showAurora = wide && finePointer && inView && tabVisible;
 
   return (
     <div ref={hostRef} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -115,7 +130,9 @@ export function HeroBackground() {
             <SoftAurora
               color1="#22c7e8"
               color2="#7c6cf0"
-              speed={0.3}
+              // A still aurora when the visitor asked for reduced motion: same
+              // shape and colour, no drift, no mouse response.
+              speed={reduced ? 0 : 0.3}
               scale={1.5}
               brightness={0.68}
               noiseFrequency={2.1}
@@ -124,8 +141,8 @@ export function HeroBackground() {
               bandSpread={1.25}
               octaveDecay={0.12}
               layerOffset={0.35}
-              colorSpeed={0.55}
-              enableMouseInteraction
+              colorSpeed={reduced ? 0 : 0.55}
+              enableMouseInteraction={!reduced}
               mouseInfluence={0.16}
             />
           </div>
@@ -136,7 +153,7 @@ export function HeroBackground() {
             <SoftAurora
               color1="#4fd1e8"
               color2="#9b8cff"
-              speed={0.46}
+              speed={reduced ? 0 : 0.46}
               scale={2.35}
               brightness={0.6}
               noiseFrequency={2.9}
@@ -145,7 +162,7 @@ export function HeroBackground() {
               bandSpread={0.85}
               octaveDecay={0.16}
               layerOffset={0.7}
-              colorSpeed={0.85}
+              colorSpeed={reduced ? 0 : 0.85}
               enableMouseInteraction={false}
             />
           </div>
