@@ -135,10 +135,25 @@ const useAnimationLoop = (
     const track = trackRef.current;
     if (!track) return;
 
-    const prefersReduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /**
+     * Reduced motion SCALES the marquee down, it does not stop it.
+     *
+     * The previous version returned early and pinned the transform at zero, so
+     * on any machine reporting `prefers-reduced-motion: reduce` the strip was
+     * completely frozen. A stopped marquee reads as a broken component, not as
+     * a considerate one, and many Windows machines report "reduce" by default —
+     * which is why the strip ran on one PC and sat dead on another.
+     *
+     * A slow marquee is also not the kind of motion the setting exists to
+     * prevent: the setting is about vestibular triggers, and a 17px/s crawl has
+     * none of the swoop of the full-speed version.
+     */
+    const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let motionScale = reduceMq.matches ? 0.35 : 1;
+    const onReduceChange = () => {
+      motionScale = reduceMq.matches ? 0.35 : 1;
+    };
+    reduceMq.addEventListener('change', onReduceChange);
 
     const seqSize = isVertical ? seqHeight : seqWidth;
 
@@ -150,13 +165,6 @@ const useAnimationLoop = (
       track.style.transform = transformValue;
     }
 
-    if (prefersReduced) {
-      track.style.transform = isVertical ? 'translate3d(0, 0, 0)' : 'translate3d(0, 0, 0)';
-      return () => {
-        lastTimestampRef.current = null;
-      };
-    }
-
     const animate = (timestamp: number) => {
       if (lastTimestampRef.current === null) {
         lastTimestampRef.current = timestamp;
@@ -165,7 +173,9 @@ const useAnimationLoop = (
       const deltaTime = Math.max(0, timestamp - lastTimestampRef.current) / 1000;
       lastTimestampRef.current = timestamp;
 
-      const target = isHovered && hoverSpeed !== undefined ? hoverSpeed : targetVelocity;
+      // Scaled, not replaced: reduced motion slows the crawl, hover still works.
+      const target =
+        (isHovered && hoverSpeed !== undefined ? hoverSpeed : targetVelocity) * motionScale;
 
       const easingFactor = 1 - Math.exp(-deltaTime / ANIMATION_CONFIG.SMOOTH_TAU);
       velocityRef.current += (target - velocityRef.current) * easingFactor;
@@ -191,6 +201,7 @@ const useAnimationLoop = (
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
+      reduceMq.removeEventListener('change', onReduceChange);
       lastTimestampRef.current = null;
     };
   }, [targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical]);
@@ -327,6 +338,18 @@ export const LogoLoop = React.memo<LogoLoopProps>(
       [isVertical, scaleOnHover, className]
     );
 
+    /**
+     * Hover is tracked on the ROOT, not on the moving track.
+     *
+     * The track is translated by thousands of pixels as it scrolls, so binding
+     * hover to it means the hit area moves out from under the cursor: entering
+     * the visible strip does not reliably fire `mouseenter` on the track itself,
+     * which is how `pauseOnHover` ended up doing nothing. The root is static, so
+     * it is the element the cursor actually enters and leaves.
+     *
+     * `pointerenter`/`pointerleave` are used rather than the mouse equivalents
+     * because they behave consistently for mouse, touch and pen input.
+     */
     const handleMouseEnter = useCallback(() => {
       if (effectiveHoverSpeed !== undefined) setIsHovered(true);
     }, [effectiveHoverSpeed]);
@@ -461,7 +484,15 @@ export const LogoLoop = React.memo<LogoLoopProps>(
     );
 
     return (
-      <div ref={containerRef} className={rootClasses} style={containerStyle} role="region" aria-label={ariaLabel}>
+      <div
+        ref={containerRef}
+        className={rootClasses}
+        style={containerStyle}
+        role="region"
+        aria-label={ariaLabel}
+        onPointerEnter={handleMouseEnter}
+        onPointerLeave={handleMouseLeave}
+      >
         {fadeOut && (
           <>
             {isVertical ? (
@@ -513,8 +544,6 @@ export const LogoLoop = React.memo<LogoLoopProps>(
             isVertical ? 'flex-col h-max w-full' : 'flex-row w-max'
           )}
           ref={trackRef}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
         >
           {logoLists}
         </div>

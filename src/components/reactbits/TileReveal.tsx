@@ -37,11 +37,22 @@ const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 const easeInOutCubic = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+/**
+ * Ease for the fly-in.
+ *
+ * `easeOutCubic` is fastest at the very start (its initial slope is 3), so tiles
+ * were flung from their rest position and then decelerated — measured 201px in
+ * the first frame, dropping to 184, 167, 151. That front-loaded slam is what
+ * reads as not smooth. This curve starts at zero velocity, so the tiles
+ * accelerate out of rest and settle gently, which is how physical motion reads.
+ */
+const easeInOutQuart = (t: number) =>
+  t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
 
 /** Phase boundaries within the 0..1 progress. */
 const FLY_END = 0.42;
 const ZOOM_END = 0.7;
-const FLY_WINDOW = 0.28;
+const FLY_WINDOW = 0.4;
 
 type TileRevealProps = {
   /** Tile surfaces, laid out row by row. */
@@ -91,7 +102,7 @@ export function TileReveal({
   mobileAspect,
   tileRadius = 12,
   direction = "alternate",
-  stagger = 0.5,
+  stagger = 0.42,
   zoom = 1.55,
   spread = 0.45,
   scrollLength = 1.8,
@@ -221,7 +232,12 @@ export function TileReveal({
       const order = row * cols + col;
       const start = (order / lastOrder) * (FLY_END - FLY_WINDOW) * stagger * 2;
       const flyP = clamp01((p - start) / FLY_WINDOW);
-      const flyEased = easeOutCubic(flyP);
+      const flyEased = easeInOutQuart(flyP);
+      // Fade in over the first third of the flight. Snapping straight to
+      // `tileFade * tileDim` made the tile appear at 0.58 opacity in a single
+      // frame, which is a visible pop; this ramps it while the tile is still
+      // moving, so it arrives already lit.
+      const appearP = clamp01(flyP / 0.33);
 
       const flyX = dir * (1 - flyEased) * flyDistance;
       const clearX = dir * spread * flyDistance * clearEased;
@@ -236,7 +252,7 @@ export function TileReveal({
       // what makes the type readable without a shadow or a scrim: nothing is
       // drawn on top of the captures, the artwork itself just sits back until
       // the headline hands over to the content.
-      el.style.opacity = String(flyP > 0 ? tileFade * tileDim : 0);
+      el.style.opacity = String(easeOutCubic(appearP) * tileFade * tileDim);
     }
 
     if (headlineRef.current) {
