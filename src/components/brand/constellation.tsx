@@ -50,17 +50,19 @@ type Star = {
  *   Gacrux γ  12h31m09.9s  −57°06′47.6″   mag 1.64   M3.5 III (red giant)
  *   Imai   δ  12h15m08.7s  −58°44′56.1″   mag 2.79   B2 IV    (blue-white)
  *   Ginan  ε  12h21m21.6s  −60°24′04.1″   mag 3.59   K3 III   (orange)
+ *
+ * Colour is near-neutral on purpose. Real Crux stars are blue-white, but a
+ * saturated blue halo on every star turned the hero into a blue field and
+ * fought the near-black page. These are white cores with only a trace of cool
+ * or warm in the halo — enough to read as a real sky, not enough to tint the
+ * section. The brand cyan is carried by the connecting lines and the logo.
  */
 const STARS: Star[] = [
-  { x: -0.0688, y: -1.0, mag: 0.77, color: [216, 234, 255], halo: [118, 186, 255] }, // Acrux
-  { x: 0.7386, y: 0.0369, mag: 1.25, color: [210, 228, 255], halo: [114, 180, 255] }, // Mimosa
-  // Gacrux is genuinely a red giant, but an orange star here read as a stray
-  // amber glow against the cyan/blue brand palette. Rendered violet instead:
-  // still the odd-one-out in the field, still astronomically motivated (the
-  // star is the coolest of the five), but inside the palette.
-  { x: 0.1058, y: 0.82, mag: 1.64, color: [226, 214, 255], halo: [150, 120, 255] }, // Gacrux
-  { x: -0.5066, y: 0.3227, mag: 2.79, color: [208, 224, 255], halo: [122, 176, 255] }, // Imai
-  { x: -0.269, y: -0.1797, mag: 3.59, color: [238, 228, 250], halo: [170, 168, 255] }, // Ginan
+  { x: -0.0688, y: -1.0, mag: 0.77, color: [244, 248, 255], halo: [206, 224, 245] }, // Acrux
+  { x: 0.7386, y: 0.0369, mag: 1.25, color: [242, 246, 255], halo: [202, 220, 243] }, // Mimosa
+  { x: 0.1058, y: 0.82, mag: 1.64, color: [246, 240, 250], halo: [216, 200, 240] }, // Gacrux
+  { x: -0.5066, y: 0.3227, mag: 2.79, color: [240, 245, 255], halo: [204, 218, 240] }, // Imai
+  { x: -0.269, y: -0.1797, mag: 3.59, color: [244, 242, 250], halo: [212, 212, 240] }, // Ginan
 ];
 
 /** The two axes of the cross: Acrux–Gacrux (long) and Mimosa–Imai (short). */
@@ -217,48 +219,11 @@ export function Constellation({ className }: { className?: string }) {
       };
 
       // --- nebula wash ----------------------------------------------------
-      // Soft radial clouds in the brand palette. Kept deliberately broad and
-      // low-opacity: a tight, saturated cloud reads as a coloured blob sitting
-      // on the page, whereas a wide, faint one reads as ambient light. The
-      // canvas itself is edge-masked in CSS, so this haze has no visible border.
-      const drift = still ? 0 : Math.sin(time * 0.12) * 8;
-      const neb = ctx.createRadialGradient(
-        cx - scale * 0.55 + drift,
-        cy - scale * 0.4,
-        0,
-        cx - scale * 0.55 + drift,
-        cy - scale * 0.4,
-        scale * 2.1
-      );
-      neb.addColorStop(0, "rgba(34, 199, 232, 0.075)");
-      neb.addColorStop(0.3, "rgba(34, 199, 232, 0.032)");
-      neb.addColorStop(0.65, "rgba(34, 199, 232, 0.009)");
-      neb.addColorStop(1, "rgba(34, 199, 232, 0)");
-      ctx.fillStyle = neb;
-      ctx.fillRect(0, 0, w, h);
-
-      const neb2 = ctx.createRadialGradient(
-        cx + scale * 0.65 - drift,
-        cy + scale * 0.55,
-        0,
-        cx + scale * 0.65 - drift,
-        cy + scale * 0.55,
-        scale * 1.9
-      );
-      neb2.addColorStop(0, "rgba(132, 148, 255, 0.055)");
-      neb2.addColorStop(0.45, "rgba(132, 148, 255, 0.016)");
-      neb2.addColorStop(1, "rgba(132, 148, 255, 0)");
-      ctx.fillStyle = neb2;
-      ctx.fillRect(0, 0, w, h);
-
-      // A wider, softer core glow behind the cross, so the stars read as
-      // embedded in the haze rather than pasted on top of it.
-      const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, scale * 1.35);
-      coreGlow.addColorStop(0, "rgba(34, 199, 232, 0.055)");
-      coreGlow.addColorStop(0.5, "rgba(34, 199, 232, 0.016)");
-      coreGlow.addColorStop(1, "rgba(34, 199, 232, 0)");
-      ctx.fillStyle = coreGlow;
-      ctx.fillRect(0, 0, w, h);
+      // Deliberately omitted. A coloured haze behind the cross read as a blue
+      // wash lifting the page off near-black, which is the opposite of the
+      // intended look. The canvas now paints only stars, lines and dust; the
+      // page background supplies the darkness.
+      void 0;
 
       // --- background field stars ----------------------------------------
       // Three depth layers. Distant stars are small, dim and cool; nearer ones
@@ -273,17 +238,18 @@ export function Constellation({ className }: { className?: string }) {
         if (s.tier === 2) {
           // Near star: soft halo so it does not look like a dead pixel.
           const halo = ctx.createRadialGradient(px2, py2, 0, px2, py2, s.r * 3.4);
-          halo.addColorStop(0, `rgba(214, 232, 255, ${a * 0.5})`);
-          halo.addColorStop(1, "rgba(214, 232, 255, 0)");
+          halo.addColorStop(0, `rgba(238, 244, 252, ${a * 0.5})`);
+          halo.addColorStop(1, "rgba(238, 244, 252, 0)");
           ctx.fillStyle = halo;
           ctx.beginPath();
           ctx.arc(px2, py2, s.r * 3.4, 0, Math.PI * 2);
           ctx.fill();
         }
 
+        // Near-white, with only a hint of warmth on the few stars that carry it.
         ctx.fillStyle = s.warm
-          ? `rgba(255, 226, 200, ${a})`
-          : `rgba(214, 230, 250, ${a})`;
+          ? `rgba(255, 240, 226, ${a})`
+          : `rgba(240, 244, 250, ${a})`;
         ctx.beginPath();
         ctx.arc(px2, py2, s.r, 0, Math.PI * 2);
         ctx.fill();
@@ -325,22 +291,24 @@ export function Constellation({ className }: { className?: string }) {
           const p1 = project(STARS[a].x, STARS[a].y);
           const p2 = project(STARS[b].x, STARS[b].y);
           const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-          grad.addColorStop(0, rgba(STARS[a].halo, 0.5));
-          grad.addColorStop(0.5, "rgba(34, 199, 232, 0.16)");
-          grad.addColorStop(1, rgba(STARS[b].halo, 0.5));
+          // Near-white, with the faintest cyan at the midpoint so the lines
+          // still read as the brand's light rather than as grey wire.
+          grad.addColorStop(0, "rgba(226, 236, 245, 0.55)");
+          grad.addColorStop(0.5, "rgba(150, 196, 210, 0.22)");
+          grad.addColorStop(1, "rgba(226, 236, 245, 0.55)");
 
           // Two passes: a wide soft stroke under a crisp thin one. A single flat
           // 1px line reads as a wireframe; the halo makes it read as light.
           ctx.strokeStyle = grad;
           ctx.lineWidth = 3.2;
-          ctx.globalAlpha = lineProgress * 0.22;
+          ctx.globalAlpha = lineProgress * 0.16;
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
           ctx.stroke();
 
           ctx.lineWidth = 1;
-          ctx.globalAlpha = lineProgress * 0.9;
+          ctx.globalAlpha = lineProgress * 0.72;
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);

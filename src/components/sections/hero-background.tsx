@@ -73,12 +73,14 @@ export function HeroBackground() {
       {/* Static base: also the mobile / reduced-motion experience. */}
       <div className="from-base via-surface to-base absolute inset-0 bg-gradient-to-b" />
 
-      {/* Restrained cyan bloom behind the headline — pure CSS, cheap, static. */}
+      {/* A very faint neutral bloom behind the headline. This used to be a
+          saturated cyan radial at 0.16, which was a large part of why the hero
+          read blue rather than near-black. */}
       <div
-        className="absolute -top-1/3 left-1/2 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full opacity-[0.16] blur-[110px]"
+        className="absolute -top-1/3 left-1/2 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full opacity-[0.07] blur-[110px]"
         style={{
           background:
-            "radial-gradient(circle, rgba(34,199,232,0.55) 0%, rgba(34,199,232,0.12) 45%, transparent 70%)",
+            "radial-gradient(circle, rgba(200,220,240,0.5) 0%, rgba(200,220,240,0.1) 45%, transparent 70%)",
         }}
       />
 
@@ -87,31 +89,24 @@ export function HeroBackground() {
         // rounded container. `inset-0` + explicit w/h avoids the visible vertical
         // seam the parent-sized canvas produced.
         //
-        // Colour: the shader's own `hueShift` ADDS to each pixel's hue rather
-        // than setting it, so a warm source pixel plus a shift lands somewhere
-        // unpredictable — the field ends up multi-hued and the warm/green
-        // patches read as a foreign aurora.
+        // Colour, and why this is NOT a tinted gradient any more:
         //
-        // CSS `hue-rotate` was not enough: measured on the rendered canvas it
-        // still left ~10k green pixels (hue ~140), because the shader's output
-        // spans a wide hue range and a single rotation cannot collapse it.
+        // The shader's own `hueShift` ADDS to each pixel's hue, so a wide-hue
+        // source ends up multi-hued and the warm patches read as a foreign
+        // aurora. The previous fix forced the palette with `mix-blend-mode:
+        // color` over a saturated cyan gradient — which did kill the warm hues
+        // but also flooded the whole hero with blue, turning a near-black page
+        // into a blue one.
         //
-        // `mix-blend-mode: color` is the reliable fix: it takes LIGHTNESS from
-        // the shader (so the structure and motion survive) and HUE+SATURATION
-        // from the element behind it. The layer below is painted with the brand
-        // cyan, so every pixel of the veil is forced into the cyan-blue band no
-        // matter what the shader emits.
+        // The correct fix is to keep the veil MONOCHROME and let the page stay
+        // near-black: grayscale strips every hue the shader emits (so no warm
+        // or green can survive), and a low opacity keeps it reading as subtle
+        // texture rather than a colour wash. The brand's cyan is carried by the
+        // logo and the constellation, not by the background.
         <div className="hero-veil absolute inset-0 overflow-hidden">
           <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(140deg, rgba(34,199,232,0.30) 0%, rgba(96,165,250,0.20) 45%, rgba(167,139,250,0.14) 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-0 opacity-[0.5]"
-            style={{ mixBlendMode: "color" }}
+            className="absolute inset-0 opacity-[0.3]"
+            style={{ filter: "grayscale(1) contrast(1.05)" }}
           >
             <DarkVeil
               hueShift={0}
