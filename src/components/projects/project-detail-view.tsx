@@ -9,6 +9,11 @@ import { AppWindow } from "@/components/brand/app-window";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import ScrollReveal from "@/components/reactbits/ScrollReveal";
 import BorderGlow from "@/components/reactbits/BorderGlow";
+import AnimatedContent from "@/components/reactbits/AnimatedContent";
+import ScrollFloat from "@/components/reactbits/ScrollFloat";
+import TiltedCard from "@/components/reactbits/TiltedCard";
+import CountUp from "@/components/reactbits/CountUp";
+import StarBorder from "@/components/reactbits/StarBorder";
 import type { Product, ProjectDetail } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +79,7 @@ export function ProjectDetailView({
           </div>
 
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7 lg:self-center">
               <p
                 className="mb-5 text-[0.6875rem] font-semibold tracking-[0.18em] uppercase"
                 style={{ color: accent }}
@@ -92,10 +97,18 @@ export function ProjectDetailView({
 
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 {product.url ? (
-                  <Cta href={product.url} external variant="primary">
-                    {t(product.cta)}
-                    <CtaArrow />
-                  </Cta>
+                  <StarBorder
+                    as="div"
+                    color="#22c7e8"
+                    speed="5s"
+                    thickness={1}
+                    className="!rounded-full !p-0"
+                  >
+                    <Cta href={product.url} external variant="primary">
+                      {t(product.cta)}
+                      <CtaArrow />
+                    </Cta>
+                  </StarBorder>
                 ) : (
                   <span className="border-line text-ink-subtle inline-flex items-center rounded-full border px-4 py-2 text-sm">
                     {t(detail.status)}
@@ -104,25 +117,63 @@ export function ProjectDetailView({
               </div>
             </div>
 
-            {/* Facts sit opposite the headline on wide screens. */}
-            {detail.facts && (
-              <div className="lg:col-span-5">
-                <dl className="border-line grid grid-cols-1 border-t sm:grid-cols-3 lg:grid-cols-1 lg:border-t-0">
-                  {detail.facts.map((f) => (
-                    <div
-                      key={f.label.en}
-                      className="border-line flex items-baseline justify-between gap-4 border-b py-4 lg:border-t lg:border-b-0 lg:py-4"
-                    >
-                      <dt className="text-ink-subtle text-[0.75rem] tracking-[0.1em] uppercase">
-                        {t(f.label)}
-                      </dt>
-                      <dd className="text-ink text-[0.9375rem] font-medium">{t(f.value)}</dd>
+            {/* The product itself, tilted on a spring so the hero is not a bare
+                block of text. TiltedCard tracks the pointer and settles back,
+                which reads as the product being held rather than pasted in. */}
+            <div className="lg:col-span-5">
+              <AnimatedContent distance={40} duration={0.9} delay={0.15} threshold={0.05}>
+                <TiltedCard
+                  imageSrc={product.shot}
+                  altText={t(product.shotAlt)}
+                  captionText={product.name}
+                  containerHeight="clamp(15rem, 26vw, 22rem)"
+                  containerWidth="100%"
+                  imageHeight="100%"
+                  imageWidth="100%"
+                  rotateAmplitude={9}
+                  scaleOnHover={1.04}
+                  showMobileWarning={false}
+                  showTooltip={false}
+                  displayOverlayContent
+                  overlayContent={
+                    <div className="pointer-events-none flex h-full w-full items-end justify-start p-4">
+                      <span className="border-line bg-base/80 text-ink rounded-full border px-3 py-1 text-[0.75rem] font-medium backdrop-blur-sm">
+                        {product.shotTitle}
+                      </span>
                     </div>
-                  ))}
-                </dl>
-              </div>
-            )}
+                  }
+                />
+              </AnimatedContent>
+            </div>
+
           </div>
+
+          {/* Facts run as a full-width strip under the hero. Putting them in the
+              same grid row as the text and the capture overflowed the 12-column
+              grid (7 + 5 + 5), so they get their own row. */}
+          {detail.facts && (
+            <div className="mt-14">
+              <dl className="border-line grid grid-cols-1 border-t sm:grid-cols-3">
+                  {detail.facts.map((f) => (
+                    <AnimatedContent
+                      key={f.label.en}
+                      distance={18}
+                      duration={0.6}
+                      delay={0.08}
+                      threshold={0.2}
+                      className="border-line border-b sm:border-r sm:last:border-r-0"
+                    >
+                      <div className="flex items-baseline justify-between gap-4 px-1 py-4">
+                        <dt className="text-ink-subtle text-[0.75rem] tracking-[0.1em] uppercase">
+                          {t(f.label)}
+                        </dt>
+                        <dd className="text-ink text-[0.9375rem] font-medium">{t(f.value)}</dd>
+                      </div>
+                    </AnimatedContent>
+                ))}
+              </dl>
+            </div>
+          )}
         </div>
       </section>
 
@@ -132,11 +183,13 @@ export function ProjectDetailView({
           <Reveal className="lg:col-span-4">
             <p className="eyebrow">{lang === "id" ? "Masalahnya" : "The problem"}</p>
           </Reveal>
-          <Reveal delay={80} className="lg:col-span-8">
-            <p className="text-ink max-w-3xl text-[clamp(1.125rem,2.1vw,1.5rem)] leading-[1.55] tracking-[-0.015em]">
-              {t(detail.problem)}
-            </p>
-          </Reveal>
+          <div className="lg:col-span-8">
+            <AnimatedContent distance={28} duration={0.85} delay={0.1} threshold={0.15}>
+              <p className="text-ink max-w-3xl text-[clamp(1.125rem,2.1vw,1.5rem)] leading-[1.55] tracking-[-0.015em]">
+                {t(detail.problem)}
+              </p>
+            </AnimatedContent>
+          </div>
         </div>
       </section>
 
@@ -159,14 +212,19 @@ export function ProjectDetailView({
       {/* ---------- What it does ---------- */}
       <section className="border-line border-t py-20 md:py-28">
         <div className="shell">
-          <Reveal className="mb-12">
+          <div className="mb-12">
             <p className="eyebrow mb-5">{lang === "id" ? "Yang sudah jalan" : "What it does today"}</p>
-            <h2 className="text-ink max-w-2xl text-[clamp(1.5rem,3vw,2.25rem)] leading-[1.12] font-semibold">
+            <ScrollFloat
+              containerClassName="!my-0 max-w-2xl"
+              textClassName="!text-[clamp(1.5rem,3vw,2.25rem)] !leading-[1.12] !font-semibold !text-ink !tracking-[-0.02em]"
+              animationDuration={0.9}
+              stagger={0.02}
+            >
               {lang === "id"
                 ? "Fitur yang benar-benar ada, bukan rencana."
                 : "Features that actually exist, not plans."}
-            </h2>
-          </Reveal>
+            </ScrollFloat>
+          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {detail.features.map((f, i) => (
@@ -202,14 +260,19 @@ export function ProjectDetailView({
       {detail.gallery.length > 0 && (
         <section className="border-line border-t py-20 md:py-28">
           <div className="shell">
-            <Reveal className="mb-12">
+            <div className="mb-12">
               <p className="eyebrow mb-5">{lang === "id" ? "Tampilannya" : "What it looks like"}</p>
-              <h2 className="text-ink max-w-2xl text-[clamp(1.5rem,3vw,2.25rem)] leading-[1.12] font-semibold">
+              <ScrollFloat
+                containerClassName="!my-0 max-w-2xl"
+                textClassName="!text-[clamp(1.5rem,3vw,2.25rem)] !leading-[1.12] !font-semibold !text-ink !tracking-[-0.02em]"
+                animationDuration={0.9}
+                stagger={0.02}
+              >
                 {lang === "id"
                   ? "Tangkapan asli dari produk yang berjalan."
                   : "Real captures of the running product."}
-              </h2>
-            </Reveal>
+              </ScrollFloat>
+            </div>
 
             <div className={cn("grid gap-6", detail.gallery.length > 1 && "lg:grid-cols-2")}>
               {detail.gallery.map((g, i) => (
