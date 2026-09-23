@@ -231,9 +231,21 @@ export function ProjectDetailView({
             </ScrollFloat>
           </div>
 
+          {/* An odd number of features leaves the last cell of a 2-column grid
+              empty, which reads as a card that failed to load rather than as
+              whitespace. The final card spans both columns in that case, so the
+              grid always closes cleanly. */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {detail.features.map((f, i) => (
-              <Reveal key={f.title.en} delay={i * 60} className="h-full">
+              <Reveal
+                key={f.title.en}
+                delay={i * 60}
+                className={
+                  detail.features.length % 2 === 1 && i === detail.features.length - 1
+                    ? "h-full sm:col-span-2"
+                    : "h-full"
+                }
+              >
                 <BorderGlow
                   colors={["#22c7e8", "#7dd3fc", "#a5f3fc"]}
                   backgroundColor="#0B0E11"
