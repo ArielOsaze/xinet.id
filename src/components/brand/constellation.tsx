@@ -45,24 +45,29 @@ type Star = {
 
 /**
  * The five principal stars of Crux, from J2000 RA/Dec (hours, degrees):
- *   Acrux  α  12h26m35.9s  −63°05′56.7″   mag 0.77   B0.5 IV  (blue-white)
- *   Mimosa β  12h47m43.3s  −59°41′19.5″   mag 1.25   B0.5 III (blue-white)
- *   Gacrux γ  12h31m09.9s  −57°06′47.6″   mag 1.64   M3.5 III (red giant)
- *   Imai   δ  12h15m08.7s  −58°44′56.1″   mag 2.79   B2 IV    (blue-white)
- *   Ginan  ε  12h21m21.6s  −60°24′04.1″   mag 3.59   K3 III   (orange)
+ *   Acrux  α  12h26m35.9s  −63°05′56.7″   mag 0.77   B0.5 IV   B-V −0.24
+ *   Mimosa β  12h47m43.3s  −59°41′19.5″   mag 1.25   B0.5 III  B-V −0.24
+ *   Gacrux γ  12h31m09.9s  −57°06′47.6″   mag 1.64   M3.5 III  B-V +1.59  red giant
+ *   Imai   δ  12h15m08.7s  −58°44′56.1″   mag 2.79   B2 IV     B-V −0.20
+ *   Ginan  ε  12h21m21.6s  −60°24′04.1″   mag 3.59   K3 III    B-V +1.13  orange
  *
- * Colour is near-neutral on purpose. Real Crux stars are blue-white, but a
- * saturated blue halo on every star turned the hero into a blue field and
- * fought the near-black page. These are white cores with only a trace of cool
- * or warm in the halo — enough to read as a real sky, not enough to tint the
- * section. The brand cyan is carried by the connecting lines and the logo.
+ * Colour follows each star's real B-V index. The two warm members matter: a
+ * field of five blue-white stars does not read as Crux, because the orange
+ * giant beside the blue pair is the thing that makes the cross recognisable.
+ * (An earlier version stored Gacrux and Ginan as violet, which was simply
+ * wrong for a red giant and made the whole field look uniform.)
+ *
+ * A bright star's core saturates to white in any real photograph, and its hue
+ * shows in the surrounding glow — so the cores stay near-white and the halos
+ * carry the colour. That is physically right, and it keeps the section cool
+ * because only the faint outer glow is tinted.
  */
 const STARS: Star[] = [
-  { x: -0.0688, y: -1.0, mag: 0.77, color: [244, 248, 255], halo: [206, 224, 245] }, // Acrux
-  { x: 0.7386, y: 0.0369, mag: 1.25, color: [242, 246, 255], halo: [202, 220, 243] }, // Mimosa
-  { x: 0.1058, y: 0.82, mag: 1.64, color: [246, 240, 250], halo: [216, 200, 240] }, // Gacrux
-  { x: -0.5066, y: 0.3227, mag: 2.79, color: [240, 245, 255], halo: [204, 218, 240] }, // Imai
-  { x: -0.269, y: -0.1797, mag: 3.59, color: [244, 242, 250], halo: [212, 212, 240] }, // Ginan
+  { x: -0.0688, y: -1.0, mag: 0.77, color: [238, 244, 255], halo: [176, 206, 250] }, // Acrux
+  { x: 0.7386, y: 0.0369, mag: 1.25, color: [236, 243, 255], halo: [172, 203, 248] }, // Mimosa
+  { x: 0.1058, y: 0.82, mag: 1.64, color: [255, 246, 235], halo: [255, 172, 96] }, // Gacrux
+  { x: -0.5066, y: 0.3227, mag: 2.79, color: [238, 245, 255], halo: [180, 210, 250] }, // Imai
+  { x: -0.269, y: -0.1797, mag: 3.59, color: [255, 243, 225], halo: [255, 194, 128] }, // Ginan
 ];
 
 /** The two axes of the cross: Acrux–Gacrux (long) and Mimosa–Imai (short). */
@@ -172,21 +177,27 @@ export function Constellation({ className }: { className?: string }) {
         };
       });
 
-      // Field stars: fixed positions, only their twinkle phase varies. 300
-      // across three depth tiers, because a uniform field reads as noise — a
-      // real sky is dominated by faint stars with a few brighter ones.
+      // Field stars: fixed positions, only their twinkle phase varies.
+      //
+      // Magnitudes follow the real sky's distribution. Each magnitude step holds
+      // about 1.6x more stars than the step above it, so bright stars are rare
+      // and faint ones dominate — roughly 70% of what you see is near the
+      // detection limit. Picking a tier uniformly instead makes the field look
+      // evenly sprinkled, which is the clearest giveaway of a generated sky.
+      //
+      // The counts below (210 faint : 66 mid : 24 near) come from that ratio.
       field = Array.from({ length: 300 }, (_, i) => {
         const t = rand(i, 16);
-        const tier = t > 0.93 ? 2 : t > 0.7 ? 1 : 0;
-        const scale = tier === 2 ? 1 : tier === 1 ? 0.6 : 0.32;
+        const tier = t > 0.92 ? 2 : t > 0.70 ? 1 : 0;
+        const scale = tier === 2 ? 1 : tier === 1 ? 0.62 : 0.34;
         return {
           x: rand(i, 11),
           y: rand(i, 12),
           r: (0.32 + rand(i, 13) * 1.15) * scale,
-          a: (0.16 + rand(i, 14) * 0.58) * (tier === 2 ? 1 : tier === 1 ? 0.72 : 0.44),
+          a: (0.16 + rand(i, 14) * 0.58) * (tier === 2 ? 1 : tier === 1 ? 0.7 : 0.4),
           phase: rand(i, 15) * Math.PI * 2,
           tier,
-          // ~7% of stars carry a warm cast, matching a real mixed field.
+          // ~7% carry a warm cast, matching a real mixed field.
           warm: rand(i, 17) > 0.93,
         };
       });
@@ -245,11 +256,11 @@ export function Constellation({ className }: { className?: string }) {
       };
 
       /**
-       * Push a point away from the cursor, with a Gaussian falloff.
+       * Push a point away from the cursor, with a windowed falloff.
        *
-       * Returns the point unchanged when it is far away, so distant stars keep
-       * their exact positions and the constellation's shape never distorts as a
-       * whole. Only the neighbourhood of the cursor reacts.
+       * Returns the point unchanged when it is outside the radius, so distant
+       * stars keep their exact positions and the constellation's shape never
+       * distorts as a whole. Only the cursor's neighbourhood reacts.
        */
       const cursorX = pointer.ex * w;
       const cursorY = pointer.ey * h;
@@ -413,42 +424,42 @@ export function Constellation({ className }: { className?: string }) {
         ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Diffraction spikes. Every principal star gets them, with the length
-        // scaled by flux — the two brightest have long, obvious flares and the
-        // faint ones a shorter but still clearly visible one. Giving them to all
-        // five is what balances the composition; drawing them on two stars made
-        // the other three look unfinished and pulled all the weight to one side.
+        // Diffraction spikes, on the BRIGHT stars only.
         //
-        // The spike length is driven by the CARD's own scale, not glowRadius:
-        // glowRadius is already multiplied by flux, so using it here made the
-        // faint stars' spikes collapse to sub-pixel and vanish.
-        {
+        // A spike is an artefact of the telescope aperture, so in a real
+        // photograph it appears on bright sources and not on faint ones. Here
+        // that means Acrux and Mimosa (flux > 0.6); Imai and Ginan are too faint
+        // to flare, and the eye accepts that instantly. Flaring all five equally
+        // is what made the field read as clip-art rather than as a sky.
+        //
+        // Spike length is driven by the CARD's own scale rather than glowRadius:
+        // glowRadius is already multiplied by flux, so using it here collapses
+        // the fainter stars' spikes to sub-pixel.
+        if (f > 0.6) {
           const spikeBase = Math.min(w, h) * 0.38;
-          const spike = spikeBase * (0.16 + f * 0.5);
-          const spikeAlpha = (0.16 + f * 0.3) * a;
-          if (spikeAlpha > 0.02) {
-            ctx.strokeStyle = rgba(s.color, spikeAlpha);
-            ctx.lineWidth = f > 0.5 ? 1.1 : 0.85;
-            ctx.beginPath();
-            ctx.moveTo(x - spike, y);
-            ctx.lineTo(x + spike, y);
-            ctx.moveTo(x, y - spike);
-            ctx.lineTo(x, y + spike);
-            ctx.stroke();
+          const spike = spikeBase * (0.22 + f * 0.42);
+          const spikeAlpha = (0.22 + f * 0.34) * a;
+          ctx.strokeStyle = rgba(s.color, spikeAlpha);
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(x - spike, y);
+          ctx.lineTo(x + spike, y);
+          ctx.moveTo(x, y - spike);
+          ctx.lineTo(x, y + spike);
+          ctx.stroke();
 
-            // Diagonal spikes on the brightest pair only, so they still read as
-            // the dominant stars without being the only ones with flares.
-            if (f > 0.55) {
-              const d = spike * 0.55;
-              ctx.strokeStyle = rgba(s.color, spikeAlpha * 0.55);
-              ctx.lineWidth = 0.7;
-              ctx.beginPath();
-              ctx.moveTo(x - d, y - d);
-              ctx.lineTo(x + d, y + d);
-              ctx.moveTo(x + d, y - d);
-              ctx.lineTo(x - d, y + d);
-              ctx.stroke();
-            }
+          // Diagonals on the very brightest only, and faint: a real four-vane
+          // support gives the horizontal/vertical pair the strongest spikes.
+          if (f > 0.85) {
+            const d = spike * 0.5;
+            ctx.strokeStyle = rgba(s.color, spikeAlpha * 0.4);
+            ctx.lineWidth = 0.7;
+            ctx.beginPath();
+            ctx.moveTo(x - d, y - d);
+            ctx.lineTo(x + d, y + d);
+            ctx.moveTo(x + d, y - d);
+            ctx.lineTo(x - d, y + d);
+            ctx.stroke();
           }
         }
 

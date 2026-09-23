@@ -650,6 +650,17 @@ export const COPY = {
       id: "Logo Xinet",
       en: "Xinet logo",
     },
+    // Sits under the constellation. The four-point cross formed by Crux is the
+    // same X as the wordmark, so the caption names that connection: the shape is
+    // the company's idea of separate products meeting at one point.
+    constellationLabel: {
+      id: "Empat bintang, satu titik temu. Bentuk X yang sama dengan logo kami.",
+      en: "Four stars, one crossing point. The same X as our mark.",
+    },
+    constellationAlt: {
+      id: "Rasi bintang Crux membentuk huruf X",
+      en: "The Crux constellation forming an X",
+    },
   },
   ecosystem: {
     eyebrow: { id: "Ekosistem Kami", en: "Our Ecosystem" },

@@ -38,8 +38,14 @@ export function HeroBackground() {
    * shader's mouseInfluence was wired up but permanently idle, and the hero
    * felt dead to the pointer. Tracking on the window instead keeps the layer
    * click-through AND makes it respond.
+   *
+   * A REF, not state. With state, every pointer move re-rendered this component
+   * (and the whole aurora subtree) at pointer-event rate — and to avoid that
+   * cost the position had to be quantised to a 0.002 step, which is ~3px and
+   * made the warp visibly step. A ref writes in place: no re-render, no
+   * quantisation, and the shader reads it once per frame.
    */
-  const [pointer, setPointer] = useState({ x: 0.5, y: 0.5 });
+  const pointer = useRef({ x: 0.5, y: 0.5 });
   const [wide, setWide] = useState(false);
   const [finePointer, setFinePointer] = useState(false);
   const [inView, setInView] = useState(false);
@@ -94,24 +100,41 @@ export function HeroBackground() {
 
   /**
    * Follow the pointer across the whole window, then normalise it to the hero
-   * box. `passive` because this fires constantly and must never block scrolling,
-   * and the value is only committed when it actually moves, so React is not
-   * re-rendered on every pixel of travel.
+   * box. `passive` because this fires constantly and must never block scrolling.
+   *
+   * The rect is cached and only re-measured on resize/scroll: calling
+   * getBoundingClientRect() inside a pointermove handler forces a layout flush
+   * on every event, which is a real source of stutter while moving the mouse.
    */
   useEffect(() => {
-    const onMove = (e: PointerEvent) => {
+    let rect = { left: 0, top: 0, width: 0, height: 0 };
+
+    const measure = () => {
       const el = hostRef.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-      const y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
-      setPointer((prev) =>
-        Math.abs(prev.x - x) < 0.002 && Math.abs(prev.y - y) < 0.002 ? prev : { x, y }
-      );
+      rect = { left: r.left + window.scrollX, top: r.top + window.scrollY, width: r.width, height: r.height };
     };
+
+    const onMove = (e: PointerEvent) => {
+      if (!rect.width || !rect.height) return;
+      // The cached rect is in page space, so scroll is added back here rather
+      // than measured per event.
+      const x = Math.min(1, Math.max(0, (e.clientX + window.scrollX - rect.left) / rect.width));
+      const y = Math.min(1, Math.max(0, (e.clientY + window.scrollY - rect.top) / rect.height));
+      pointer.current.x = x;
+      pointer.current.y = y;
+    };
+
+    measure();
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure);
+    };
   }, []);
 
   // Pause when the tab is in the background.

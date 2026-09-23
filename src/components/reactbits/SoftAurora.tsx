@@ -23,8 +23,13 @@ interface SoftAuroraProps {
    * Pointer position normalised to the container, driven by the parent.
    * Needed when the layer is `pointer-events-none`: the canvas then never
    * receives a mousemove, so it cannot track the pointer itself.
+   *
+   * A REF, not a value: a value prop forces the parent to re-render React on
+   * every pointer move, and avoiding that re-render is why the position used to
+   * be quantised to a 0.002 step — which stepped the input and made the warp
+   * look jerky. A ref updates in place: no render, no quantisation.
    */
-  mouse?: { x: number; y: number };
+  mouse?: { current: { x: number; y: number } };
 }
 
 function hexToVec3(hex: string): [number, number, number] {
@@ -171,17 +176,23 @@ void main() {
     vec2 p = gl_FragCoord.xy / uResolution.y;
     vec2 toM = p - m;
     float dist = length(toM);
-    // Windowed falloff, NOT a Gaussian.
+
+    // Smooth radial displacement.
     //
-    // A Gaussian only approaches zero, so at 1.5x the radius it still passed
-    // ~9% of the influence, which stayed visible a few hundred pixels from the
-    // cursor: the effect looked global. Smoothstep reaches exactly zero AT the
-    // radius, so the reaction is confined to the cursor's neighbourhood and
-    // nothing outside it moves at all.
-    float window = clamp(1.0 - dist / max(uMouseRadius, 0.0001), 0.0, 1.0);
-    float falloff = window * window * (3.0 - 2.0 * window);
-    // Push outward from the cursor, so the band bulges around it.
-    shift = normalize(toM + vec2(0.0001)) * falloff * uMouseInfluence;
+    // Two things made the previous version feel rough:
+    //  - it used normalize(), whose direction is undefined at zero length, so
+    //    the push flipped about as the cursor crossed a fragment;
+    //  - its window peaked in slope right at the cursor, so the fastest movement
+    //    happened exactly where the eye was looking.
+    //
+    // This displaces along the radius by a smoothstep of the distance: 0 at the
+    // centre, maximum around half the radius, exactly 0 at the radius. Both the
+    // value and its slope are continuous, and nothing outside the radius moves.
+    float t = clamp(dist / max(uMouseRadius, 0.0001), 0.0, 1.0);
+    float profile = smoothstep(0.0, 0.5, t) * (1.0 - smoothstep(0.5, 1.0, t));
+    // Dividing by max(dist, eps) instead of normalize(): the direction stays
+    // finite at the centre, where the profile is zero anyway.
+    shift = (toM / max(dist, 1e-4)) * profile * uMouseInfluence;
   }
 
   float glow1 = auroraGlow(t, shift);
@@ -232,10 +243,8 @@ export default function SoftAurora({
   lightMode = false,
   mouse,
 }: SoftAuroraProps) {
-  // Latest external pointer, read by the render loop every frame. Kept in a
-  // ref so moving the cursor never re-creates the WebGL context.
-  const mouseRef = useRef<{ x: number; y: number } | undefined>(undefined);
-  mouseRef.current = mouse;
+  // Latest external pointer, read by the render loop every frame.
+  const mouseRef = mouse;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -306,6 +315,7 @@ export default function SoftAurora({
     }
 
     let animationFrameId: number;
+    let lastTime = 0;
 
     function update(time: number) {
       animationFrameId = requestAnimationFrame(update);
@@ -315,11 +325,19 @@ export default function SoftAurora({
         // A parent-supplied pointer wins: on a `pointer-events-none` layer the
         // canvas listener never fires, so targetMouse would stay pinned at 0.5
         // and the shader would look dead to the cursor.
-        if (mouseRef.current) {
+        if (mouseRef) {
           targetMouse = [mouseRef.current.x, 1 - mouseRef.current.y];
         }
-        currentMouse[0] += 0.05 * (targetMouse[0] - currentMouse[0]);
-        currentMouse[1] += 0.05 * (targetMouse[1] - currentMouse[1]);
+        // Exponential smoothing expressed per SECOND, so the feel is identical
+        // at 60Hz and 144Hz. The previous fixed 0.05-per-frame eased twice as
+        // fast on a high-refresh display, which is part of why it felt uneven.
+        // 3.2/s is deliberately soft: the aurora should drift after the cursor,
+        // not snap to it.
+        const dt = Math.min(0.05, (time - lastTime) / 1000 || 0.016);
+        lastTime = time;
+        const k = 1 - Math.exp(-3.2 * dt);
+        currentMouse[0] += k * (targetMouse[0] - currentMouse[0]);
+        currentMouse[1] += k * (targetMouse[1] - currentMouse[1]);
         program.uniforms.uMouse.value[0] = currentMouse[0];
         program.uniforms.uMouse.value[1] = currentMouse[1];
       } else {
