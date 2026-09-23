@@ -256,7 +256,11 @@ export function ProjectDetailView({
         </div>
       </section>
 
-      {/* ---------- Gallery ---------- */}
+      {/* ---------- Gallery ----------
+          Products with a single distinct capture (Amara, LumaWall) have no
+          gallery: their hero already shows that one screen, so repeating it here
+          would show the same image twice on one page. The section is skipped
+          entirely rather than rendered empty. */}
       {detail.gallery.length > 0 && (
         <section className="border-line border-t py-20 md:py-28">
           <div className="shell">

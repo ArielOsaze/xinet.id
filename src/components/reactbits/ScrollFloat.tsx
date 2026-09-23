@@ -29,13 +29,30 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
 }) => {
   const containerRef = useRef<HTMLHeadingElement>(null);
 
+  /**
+   * Split into WORDS, not characters.
+   *
+   * The upstream version splits per character and swaps each space for U+00A0.
+   * Layout looks identical, but `textContent` then reads
+   * "Featuresthatactuallyexist" — non-breaking spaces are not word separators
+   * for text extraction, so copy-paste, search engines and screen readers all
+   * see one run-on word. Keeping real spaces between the spans fixes that while
+   * animating exactly the same way.
+   */
   const splitText = useMemo(() => {
     const text = typeof children === 'string' ? children : '';
-    return text.split('').map((char, index) => (
-      <span className="inline-block word" key={index}>
-        {char === ' ' ? '\u00A0' : char}
-      </span>
-    ));
+    const words = text.split(' ');
+    return words.flatMap((word, i) => {
+      const nodes = [
+        <span className="inline-block word" key={`w${i}`}>
+          {word}
+        </span>,
+      ];
+      // A real space BETWEEN the inline-blocks: collapses visually, but keeps
+      // the words separate in the extracted text.
+      if (i < words.length - 1) nodes.push(<span key={`s${i}`}> </span>);
+      return nodes;
+    });
   }, [children]);
 
   useEffect(() => {
@@ -44,7 +61,7 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
 
     const scroller = scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
 
-    const charElements = el.querySelectorAll('.inline-block');
+    const charElements = el.querySelectorAll('.word');
 
     gsap.fromTo(
       charElements,

@@ -211,13 +211,6 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
     ],
     gallery: [
       {
-        src: "/products/tile-nexshop.webp",
-        caption: {
-          id: "Beranda toko dengan katalog top up game.",
-          en: "The storefront with its game top-up catalog.",
-        },
-      },
-      {
         src: "/products/tile-nexshop-marketplace.webp",
         caption: {
           id: "Marketplace tempat penjual lain menaruh produk.",
@@ -292,10 +285,6 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
     ],
     gallery: [
       {
-        src: "/products/tile-saybot.webp",
-        caption: { id: "Halaman depan SayBot dan alur kerjanya.", en: "The SayBot landing page and its workflow." },
-      },
-      {
         src: "/products/tile-saybot-2.webp",
         caption: { id: "Tahapan pengiriman dan kotak masuk gabungan.", en: "Delivery stages and the unified inbox." },
       },
@@ -361,10 +350,6 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
     ],
     gallery: [
       {
-        src: "/products/tile-akuntuntas.webp",
-        caption: { id: "Laporan keuangan AkunTuntas.", en: "An AkunTuntas financial report." },
-      },
-      {
         src: "/products/tile-akuntuntas-2.webp",
         caption: { id: "Jurnal umum.", en: "The general journal." },
       },
@@ -422,13 +407,6 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       },
     ],
     gallery: [
-      {
-        src: "/products/tile-amara.webp",
-        caption: {
-          id: "Amara dengan avatar 3D dan panel percakapan.",
-          en: "Amara with its 3D avatar and chat panel.",
-        },
-      },
     ],
     facts: [
       { label: { id: "Kategori", en: "Category" }, value: { id: "Kecerdasan artifisial", en: "Artificial intelligence" } },
@@ -475,13 +453,6 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       },
     ],
     gallery: [
-      {
-        src: "/products/tile-lumawall.webp",
-        caption: {
-          id: "Katalog wallpaper LumaWall dengan pemilihan monitor.",
-          en: "The LumaWall wallpaper catalog with monitor targeting.",
-        },
-      },
     ],
     facts: [
       { label: { id: "Kategori", en: "Category" }, value: { id: "Alat desktop", en: "Desktop tools" } },
