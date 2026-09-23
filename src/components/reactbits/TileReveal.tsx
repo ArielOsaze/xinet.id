@@ -107,11 +107,38 @@ export function TileReveal({
   const [armed, setArmed] = useState(false);
   const [cols, setCols] = useState(columns);
   const [isNarrow, setIsNarrow] = useState(false);
+  /**
+   * True when the visitor's OS asks for reduced motion.
+   *
+   * This used to make the component render a plain static block — no tiles at
+   * all. That was wrong twice over:
+   *
+   *  1. It meant the section looked completely different on a machine with
+   *     "reduce motion" switched on, which reads as a bug ("the animation is
+   *     missing on my other PC") rather than as an accessibility feature.
+   *  2. The whole point of the section is the reveal; replacing it with a bare
+   *     block loses the content's structure, not just its motion.
+   *
+   * Reduced motion is honoured by *changing* the animation, not removing it:
+   * the tiles still travel and the content still reveals, but the distance,
+   * zoom and duration are cut right down and no scroll is hijacked. Same
+   * information, minimal movement.
+   */
+  const [reduced, setReduced] = useState(false);
 
   // Arm the sequence before paint so nothing flashes.
   useIsomorphicLayoutEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
     setArmed(true);
+  }, []);
+
+  // Follow the setting if the visitor changes it while the page is open.
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
   // Fewer columns on small screens keeps tiles legible and the fly-in readable.
@@ -148,14 +175,19 @@ export function TileReveal({
     const rect = container.getBoundingClientRect();
     const p = travel > 0 ? clamp01(-rect.top / travel) : 0;
 
+    // Reduced motion: the same sequence, but with the travel, zoom and spread
+    // cut to a fraction so the reveal is a gentle shift rather than a swoop.
+    const motionScale = reduced ? 0.22 : 1;
+    const zoomAmount = 1 + (zoom - 1) * motionScale;
+
     // Cap the fly distance to the viewport so tiles start just off-screen rather
     // than far outside it — this is what caused horizontal spill on mobile.
     const stageW = stage.clientWidth || window.innerWidth;
-    const flyDistance = Math.min(stageW * 1.15, window.innerWidth * 1.1);
+    const flyDistance = Math.min(stageW * 1.15, window.innerWidth * 1.1) * motionScale;
 
     // Grid zoom
     const zoomP = clamp01((p - FLY_END) / (ZOOM_END - FLY_END));
-    const gridScale = 1 + (zoom - 1) * easeInOutCubic(zoomP);
+    const gridScale = 1 + (zoomAmount - 1) * easeInOutCubic(zoomP);
     grid.style.transform = `scale(${gridScale})`;
 
     // Clear phase
@@ -190,7 +222,7 @@ export function TileReveal({
       // Centre rows drift vertically so the grid opens outward, not just sideways.
       const centre = (rows - 1) / 2;
       const rowOffset = rows > 1 ? (row - centre) / Math.max(1, centre) : 0;
-      const clearY = rowOffset * 0.12 * viewportH * clearEased;
+      const clearY = rowOffset * 0.12 * viewportH * clearEased * motionScale;
 
       el.style.transform = `translate3d(${flyX + clearX}px, ${clearY}px, 0)`;
       el.style.opacity = String(flyP > 0 ? tileFade : 0);
@@ -212,7 +244,7 @@ export function TileReveal({
       contentRef.current.style.transform = `translate3d(0, ${(1 - contentEased) * 18}px, 0)`;
       contentRef.current.style.pointerEvents = contentEased < 0.5 ? "none" : "auto";
     }
-  }, [activeItems.length, aspect, cols, direction, lastOrder, rows, spread, stagger, zoom]);
+  }, [activeItems.length, aspect, cols, direction, lastOrder, reduced, rows, spread, stagger, zoom]);
 
   useEffect(() => {
     if (!armed) return;
@@ -236,9 +268,11 @@ export function TileReveal({
     };
   }, [armed, apply]);
 
-  // ---------------------------------------------------------------- static
-  // Reduced motion (or before arming): render the content plainly. No tiles,
-  // no sticky stage, no extra scroll — and everything stays readable.
+  // ---------------------------------------------------------------- pre-arm
+  // This branch only runs during SSR and the first paint, before `armed` is set
+  // in the layout effect. It renders the same structure as the live sequence so
+  // there is no flash and no layout shift — it is not a "reduced motion"
+  // fallback any more.
   if (!armed) {
     return (
       <div className={cn("shell py-24 md:py-32", className)}>
@@ -300,21 +334,25 @@ export function TileReveal({
         </div>
 
         {/* Headline, held over the tiles. The scrim keeps the text legible
-            against tile labels at every viewport, especially on mobile. */}
+            against tile labels at every viewport, especially on mobile.
+            It is deliberately wider and denser than a plain text shadow:
+            the tiles include near-white product screenshots, and thin white
+            type over a white UI panel is unreadable however bold the shadow. */}
         {headline && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center px-6">
             <div className="relative isolate max-w-4xl">
               <div
                 aria-hidden="true"
-                className="absolute -inset-x-10 -inset-y-8 -z-10 rounded-[3rem]"
+                className="absolute -inset-x-24 -inset-y-16 -z-10 rounded-[4rem]"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, rgba(8,10,12,0.92) 0%, rgba(8,10,12,0.78) 45%, rgba(8,10,12,0) 78%)",
+                    "radial-gradient(ellipse at center, rgba(8,10,12,0.97) 0%, rgba(8,10,12,0.94) 34%, rgba(8,10,12,0.72) 58%, rgba(8,10,12,0) 82%)",
                 }}
               />
               <div
                 ref={headlineRef}
                 className="text-center text-[clamp(1.75rem,6vw,4.5rem)] leading-[1.06] font-semibold tracking-[-0.04em]"
+                style={{ textShadow: "0 2px 24px rgba(8,10,12,0.85)" }}
               >
                 {headline}
               </div>

@@ -6,16 +6,25 @@ import { useEffect, useRef, useState } from "react";
 /**
  * HeroBackground — the single animated surface on the page.
  *
- * Performance contract:
- *  - WebGL is only mounted on desktop viewports (>= 768px) with a fine pointer,
- *    so mobile never pays for it.
- *  - It is unmounted entirely when scrolled out of view, and while the tab is
- *    hidden, so an offscreen canvas never burns GPU time.
- *  - prefers-reduced-motion renders a static gradient instead.
+ * Two layers, each doing a different job:
+ *
+ *  1. SoftAurora (ReactBits, ogl) — the aurora. Its colours are explicit
+ *     (`color1` / `color2`) rather than a hue offset, so it can be aimed at the
+ *     brand's cool palette without any of the multi-hue drift the DarkVeil
+ *     shader produced. It sits at low opacity, is masked to fade out above the
+ *     fold, and blends with `screen` so it ADDS light to the dark base instead
+ *     of painting a coloured band over it.
+ *
+ *  2. A faint neutral bloom, pure CSS, behind the headline.
+ *
+ * Performance contract (unchanged):
+ *  - WebGL mounts only on desktop viewports (>= 768px) with a fine pointer.
+ *  - It is unmounted when scrolled out of view or while the tab is hidden.
+ *  - prefers-reduced-motion renders the static gradient only.
  *  - The shader is loaded lazily so it stays out of the initial JS bundle.
  */
 
-const DarkVeil = dynamic(() => import("@/components/reactbits/DarkVeil"), {
+const SoftAurora = dynamic(() => import("@/components/reactbits/SoftAurora"), {
   ssr: false,
 });
 
@@ -66,16 +75,15 @@ export function HeroBackground() {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  const showCanvas = enabled && inView && tabVisible;
+  const showAurora = enabled && inView && tabVisible;
 
   return (
     <div ref={hostRef} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* Static base: also the mobile / reduced-motion experience. */}
       <div className="from-base via-surface to-base absolute inset-0 bg-gradient-to-b" />
 
-      {/* A very faint neutral bloom behind the headline. This used to be a
-          saturated cyan radial at 0.16, which was a large part of why the hero
-          read blue rather than near-black. */}
+      {/* A very faint neutral bloom behind the headline. Deliberately not cyan:
+          a saturated bloom here is what turned the whole hero blue. */}
       <div
         className="absolute -top-1/3 left-1/2 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full opacity-[0.07] blur-[110px]"
         style={{
@@ -84,38 +92,61 @@ export function HeroBackground() {
         }}
       />
 
-      {showCanvas && (
-        // The shader is a full-bleed veil, so it must not be clipped to a
-        // rounded container. `inset-0` + explicit w/h avoids the visible vertical
-        // seam the parent-sized canvas produced.
+      {showAurora && (
+        // The aurora hangs in the upper half and fades out well before the fold,
+        // so everything below stays near-black. `screen` blend adds light rather
+        // than covering, which is what keeps it reading as sky rather than as a
+        // coloured rectangle pasted on the page.
         //
-        // Colour, and why this is NOT a tinted gradient any more:
-        //
-        // The shader's own `hueShift` ADDS to each pixel's hue, so a wide-hue
-        // source ends up multi-hued and the warm patches read as a foreign
-        // aurora. The previous fix forced the palette with `mix-blend-mode:
-        // color` over a saturated cyan gradient — which did kill the warm hues
-        // but also flooded the whole hero with blue, turning a near-black page
-        // into a blue one.
-        //
-        // The correct fix is to keep the veil MONOCHROME and let the page stay
-        // near-black: grayscale strips every hue the shader emits (so no warm
-        // or green can survive), and a low opacity keeps it reading as subtle
-        // texture rather than a colour wash. The brand's cyan is carried by the
-        // logo and the constellation, not by the background.
-        <div className="hero-veil absolute inset-0 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-[0.3]"
-            style={{ filter: "grayscale(1) contrast(1.05)" }}
-          >
-            <DarkVeil
-              hueShift={0}
-              noiseIntensity={0}
-              scanlineIntensity={0}
-              speed={0.22}
-              scanlineFrequency={0}
-              warpAmount={0.35}
-              resolutionScale={0.6}
+        // Two layers at different scales and speeds: a wide slow band and a
+        // tighter faster one. One layer alone reads as a single beam; two give
+        // the depth and drift a real aurora has.
+        <div
+          className="absolute inset-x-0 top-0 h-[82%] opacity-[0.42]"
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, black 0%, black 38%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 0%, black 38%, transparent 100%)",
+            mixBlendMode: "screen",
+          }}
+        >
+          <div className="absolute inset-0">
+            <SoftAurora
+              color1="#22c7e8"
+              color2="#7c6cf0"
+              speed={0.3}
+              scale={1.5}
+              brightness={0.68}
+              noiseFrequency={2.1}
+              noiseAmplitude={0.95}
+              bandHeight={0.46}
+              bandSpread={1.25}
+              octaveDecay={0.12}
+              layerOffset={0.35}
+              colorSpeed={0.55}
+              enableMouseInteraction
+              mouseInfluence={0.16}
+            />
+          </div>
+
+          {/* Second band: smaller scale, quicker, violet-leaning, and slightly
+              transparent so the two overlap instead of stacking opaquely. */}
+          <div className="absolute inset-0 opacity-60">
+            <SoftAurora
+              color1="#4fd1e8"
+              color2="#9b8cff"
+              speed={0.46}
+              scale={2.35}
+              brightness={0.6}
+              noiseFrequency={2.9}
+              noiseAmplitude={1.1}
+              bandHeight={0.3}
+              bandSpread={0.85}
+              octaveDecay={0.16}
+              layerOffset={0.7}
+              colorSpeed={0.85}
+              enableMouseInteraction={false}
             />
           </div>
         </div>

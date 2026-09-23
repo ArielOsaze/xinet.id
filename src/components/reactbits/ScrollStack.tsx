@@ -286,6 +286,27 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
         syncTouchLerp: 0.075
       });
 
+      /**
+       * Lenis writes `lenis` / `lenis-smooth` / `lenis-scrolling` onto
+       * <html> from its constructor, which runs on mount — before React has
+       * finished hydrating. React then compares the live <html> against the
+       * server HTML, sees class names that were not there, and reports a
+       * hydration failure (minified #418, args[]=HTML).
+       *
+       * Lenis 1.3 exposes no option to disable this, so the classes are stripped
+       * once here. They are re-added only while actually scrolling, which is
+       * after hydration and therefore harmless — and nothing in this project
+       * styles them anyway.
+       */
+      lenis.rootElement?.classList.remove(
+        "lenis",
+        "lenis-smooth",
+        "lenis-scrolling",
+        "lenis-stopped",
+        "lenis-locked",
+        "lenis-autoToggle"
+      );
+
       lenis.on('scroll', handleScroll);
 
       const raf = (time: number) => {

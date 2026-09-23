@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLang } from "@/components/providers/language-provider";
 import { COPY, PRODUCTS, type Product } from "@/lib/content";
 import { AppWindow } from "@/components/brand/app-window";
@@ -136,24 +137,36 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
           </p>
         </div>
 
-        <div className="mt-9 flex items-center gap-3">
-          {product.url ? (
-            <span className="text-ink inline-flex items-center gap-2 text-sm font-medium underline decoration-transparent underline-offset-4 transition-colors duration-300 group-hover:underline motion-reduce:transition-none">
-              {ctaLabel}
-              <span
-                aria-hidden="true"
-                className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-              >
-                →
-              </span>
+        <div className="mt-9 flex flex-wrap items-center gap-3">
+          {/* Primary action: the project page, where the full story lives. This
+              is a real <Link> rather than the whole card being one, because the
+              card also holds the "live site" anchor below — and an <a> inside an
+              <a> is invalid HTML, which makes React throw a hydration error. */}
+          <Link
+            href={`/projects/${product.id}`}
+            aria-label={ariaLabel}
+            className="text-ink focus-visible:ring-accent inline-flex items-center gap-2 rounded-sm text-sm font-medium underline decoration-transparent underline-offset-4 transition-colors duration-300 group-hover:underline hover:decoration-current focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
+          >
+            {lang === "id" ? `Lihat ${product.name}` : `View ${product.name}`}
+            <span
+              aria-hidden="true"
+              className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+            >
+              →
             </span>
-          ) : (
-            <span className="text-ink-subtle inline-flex items-center gap-2 text-sm font-medium">
-              <span className="border-line-strong rounded-full border px-2.5 py-0.5 text-[0.6875rem] tracking-[0.08em] uppercase">
-                {t(COPY.products.soon)}
-              </span>
-              {ctaLabel}
-            </span>
+          </Link>
+
+          {/* Secondary action: the live product, in a new tab. */}
+          {product.url && (
+            <a
+              href={product.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ink-subtle hover:text-ink-muted border-line hover:border-line-strong inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[0.75rem] transition-colors duration-300 motion-reduce:transition-none"
+            >
+              {t(COPY.products.liveSite)}
+              <span aria-hidden="true">↗</span>
+            </a>
           )}
         </div>
       </div>
@@ -161,18 +174,8 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
     </GlareHover>
   );
 
-  // Products with a live destination are fully clickable; the rest are static.
-  if (!product.url) return inner;
-
-  return (
-    <a
-      href={product.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={ariaLabel}
-      className="focus-visible:ring-accent group block rounded-2xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080A0C] focus-visible:outline-none"
-    >
-      {inner}
-    </a>
-  );
+  // The card itself is a plain group container, not a link: it holds two
+  // separate actions (project page + live site), so a single wrapping anchor
+  // would both nest anchors and swallow the secondary link's click.
+  return <div className="group relative rounded-2xl">{inner}</div>;
 }

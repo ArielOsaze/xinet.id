@@ -46,3 +46,6 @@ next-env.d.ts
 /.rb3
 /.npmrc-clean
 /.shots
+.rb7/
+AGENTS.md
+CLAUDE.md

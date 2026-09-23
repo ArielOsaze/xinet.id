@@ -222,6 +222,19 @@ export const LogoLoop = React.memo<LogoLoopProps>(
     const [seqHeight, setSeqHeight] = useState<number>(0);
     const [copyCount, setCopyCount] = useState<number>(ANIMATION_CONFIG.MIN_COPIES);
     const [isHovered, setIsHovered] = useState<boolean>(false);
+    /**
+     * The number of copies depends on the measured width of the container and of
+     * one sequence, neither of which exists during SSR. Rendering MIN_COPIES on
+     * the server and more on the client is a hydration mismatch (React #418):
+     * the server HTML has fewer <ul> children than the first client render.
+     *
+     * `useResizeObserver` calls its callback immediately on mount, which fires
+     * BEFORE React has finished hydrating — so a plain `setMeasured(true)` there
+     * is too early and the mismatch still happens. Instead the measurement is
+     * taken in a layout effect that runs after hydration and is deferred one
+     * frame, so React commits the server-matching tree first.
+     */
+    const [measured, setMeasured] = useState(false);
 
     const effectiveHoverSpeed = useMemo(() => {
       if (hoverSpeed !== undefined) return hoverSpeed;
@@ -268,6 +281,20 @@ export const LogoLoop = React.memo<LogoLoopProps>(
         setCopyCount(Math.max(ANIMATION_CONFIG.MIN_COPIES, copiesNeeded));
       }
     }, [isVertical]);
+
+    /**
+     * Enable the measured copy count only AFTER hydration has committed.
+     *
+     * The ResizeObserver callback fires on mount — before React finishes
+     * hydrating — so flipping `measured` there still produces a mismatch. This
+     * effect runs after the first commit, and the extra rAF lets the
+     * server-matching tree paint first.
+     */
+    useEffect(() => {
+      let raf = 0;
+      raf = requestAnimationFrame(() => setMeasured(true));
+      return () => cancelAnimationFrame(raf);
+    }, []);
 
     useResizeObserver(updateDimensions, [containerRef, seqRef], [logos, gap, logoHeight, isVertical]);
 
@@ -404,7 +431,9 @@ export const LogoLoop = React.memo<LogoLoopProps>(
 
     const logoLists = useMemo(
       () =>
-        Array.from({ length: copyCount }, (_, copyIndex) => (
+        // `measured` gates the count so the first client render matches the
+        // server's MIN_COPIES. See the note on the `measured` state above.
+        Array.from({ length: measured ? copyCount : ANIMATION_CONFIG.MIN_COPIES }, (_, copyIndex) => (
           <ul
             className={cx('flex items-center', isVertical && 'flex-col')}
             key={`copy-${copyIndex}`}
@@ -415,7 +444,7 @@ export const LogoLoop = React.memo<LogoLoopProps>(
             {logos.map((item, itemIndex) => renderLogoItem(item, `${copyIndex}-${itemIndex}`))}
           </ul>
         )),
-      [copyCount, logos, renderLogoItem, isVertical]
+      [copyCount, measured, logos, renderLogoItem, isVertical]
     );
 
     const containerStyle = useMemo(

@@ -133,6 +133,374 @@ export const STRIP: string[] = [
   "Xinet Labs",
 ];
 
+/**
+ * Per-product detail, shown on /projects/<id>.
+ *
+ * These pages exist so a visitor can click a card and actually see what the
+ * product IS — the problem it answers, the vision behind it, what it does today,
+ * and real captures of it running. Everything here is derived from the shipped
+ * products; no roadmap items are presented as features, and no metric is
+ * invented.
+ */
+export type ProjectDetail = {
+  id: string;
+  /** One line that states the product's purpose. */
+  tagline: Bi;
+  /** The problem this product exists to solve. */
+  problem: Bi;
+  /** The vision — where it is going and why it matters. */
+  vision: Bi;
+  /** What it does today, as shipped. */
+  features: { title: Bi; body: Bi }[];
+  /** Honest build status. */
+  status: Bi;
+  /** Real captures, in order. Paths live under /public/products. */
+  gallery: { src: string; caption: Bi }[];
+  /** Optional facts shown as a spec list. */
+  facts?: { label: Bi; value: Bi }[];
+};
+
+export const PROJECT_DETAILS: ProjectDetail[] = [
+  {
+    id: "nexshop",
+    tagline: {
+      id: "Tempat orang membeli produk digital tanpa ribet.",
+      en: "Where people buy digital products without friction.",
+    },
+    problem: {
+      id: "Membeli top up game dan produk digital di Indonesia masih penuh langkah: transfer manual, konfirmasi lewat chat, lalu menunggu tanpa kejelasan. Pembeli tidak tahu pesanannya diproses atau tidak, dan penjual menghabiskan waktu menjawab pertanyaan yang sama berulang kali.",
+      en: "Buying game top-ups and digital products in Indonesia is still full of steps: manual transfer, confirmation over chat, then waiting with no clarity. Buyers cannot tell whether their order is being processed, and sellers spend their day answering the same questions.",
+    },
+    vision: {
+      id: "NexShop dibangun supaya jarak antara \"aku mau beli\" dan \"pesananku selesai\" sesingkat mungkin — tanpa chat, tanpa menunggu tanpa kabar. Ke depan, NexShop jadi tulang punggung commerce digital Xinet: satu tempat untuk produk, pembayaran, dan reseller yang semuanya jalan otomatis.",
+      en: "NexShop exists to make the distance between \"I want to buy\" and \"my order is done\" as short as possible — no chat, no silent waiting. Going forward it becomes the backbone of Xinet's digital commerce: one place for products, payments and resellers, all running automatically.",
+    },
+    status: {
+      id: "Berjalan & melayani pesanan nyata",
+      en: "Live and serving real orders",
+    },
+    features: [
+      {
+        title: { id: "Katalog yang jelas", en: "A clear catalog" },
+        body: {
+          id: "Produk tersusun rapi dengan harga dan ketersediaan yang terlihat langsung, jadi pembeli tidak perlu bertanya.",
+          en: "Products laid out with visible pricing and availability, so buyers never have to ask.",
+        },
+      },
+      {
+        title: { id: "Pesanan otomatis", en: "Automatic fulfilment" },
+        body: {
+          id: "Pesanan diproses sistem tanpa campur tangan manual, sehingga pembeli tidak menunggu admin bangun.",
+          en: "Orders are processed by the system without manual handling, so no buyer waits for an admin to wake up.",
+        },
+      },
+      {
+        title: { id: "Program reseller", en: "A reseller program" },
+        body: {
+          id: "Orang lain bisa menjual ulang produk NexShop dengan harga dan margin yang sudah diatur.",
+          en: "Others can resell NexShop products with pricing and margins already handled.",
+        },
+      },
+      {
+        title: { id: "Marketplace", en: "A marketplace" },
+        body: {
+          id: "Ruang untuk penjual lain menaruh produknya, memperluas pilihan tanpa Xinet harus menambah stok sendiri.",
+          en: "Space for other sellers to list their products, widening the catalog without Xinet having to stock everything itself.",
+        },
+      },
+    ],
+    gallery: [
+      {
+        src: "/products/tile-nexshop.webp",
+        caption: {
+          id: "Beranda toko dengan katalog top up game.",
+          en: "The storefront with its game top-up catalog.",
+        },
+      },
+      {
+        src: "/products/tile-nexshop-marketplace.webp",
+        caption: {
+          id: "Marketplace tempat penjual lain menaruh produk.",
+          en: "The marketplace where other sellers list products.",
+        },
+      },
+      {
+        src: "/products/tile-nexshop-reseller.webp",
+        caption: {
+          id: "Halaman program reseller.",
+          en: "The reseller program page.",
+        },
+      },
+      {
+        src: "/products/tile-nexshop-berita.webp",
+        caption: {
+          id: "Halaman berita dan pengumuman produk.",
+          en: "The news and product announcement page.",
+        },
+      },
+    ],
+    facts: [
+      { label: { id: "Kategori", en: "Category" }, value: { id: "Perdagangan digital", en: "Digital commerce" } },
+      { label: { id: "Platform", en: "Platform" }, value: { id: "Web", en: "Web" } },
+      { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
+    ],
+  },
+  {
+    id: "saybot",
+    tagline: {
+      id: "Semua percakapan pelanggan dalam satu ruang kerja.",
+      en: "Every customer conversation in one workspace.",
+    },
+    problem: {
+      id: "Bisnis kecil biasanya melayani pelanggan di empat tempat sekaligus: WhatsApp, Telegram, email, dan chat di website. Pesan tersebar, tidak ada yang tahu siapa sudah dijawab, dan pelanggan mengulang cerita yang sama setiap kali pindah kanal.",
+      en: "A small business usually serves customers in four places at once: WhatsApp, Telegram, email and website chat. Messages scatter, nobody knows what has been answered, and customers repeat the same story every time they switch channel.",
+    },
+    vision: {
+      id: "SayBot menyatukan semua kanal jadi satu alur kerja, supaya satu orang bisa melayani banyak pelanggan tanpa ada pesan yang hilang. Tujuannya bukan mengganti manusia dengan bot, tapi membuat manusia sanggup menangani lebih banyak tanpa jadi kacau.",
+      en: "SayBot merges every channel into one workflow, so one person can serve many customers without a message going missing. The goal is not to replace people with a bot, but to let people handle more without the operation falling apart.",
+    },
+    status: { id: "Berjalan", en: "Live" },
+    features: [
+      {
+        title: { id: "Empat kanal, satu inbox", en: "Four channels, one inbox" },
+        body: {
+          id: "WhatsApp, Telegram, Email, dan Chat Website masuk ke tampilan yang sama, dengan konteks kanal tetap terlihat.",
+          en: "WhatsApp, Telegram, Email and Website Chat arrive in the same view, with each channel's context still visible.",
+        },
+      },
+      {
+        title: { id: "Alur kerja yang bisa diatur", en: "Configurable workflow" },
+        body: {
+          id: "Aturan dan tahapan disesuaikan dengan cara bisnis bekerja, bukan sebaliknya.",
+          en: "Rules and stages adapt to how the business already works, not the other way around.",
+        },
+      },
+      {
+        title: { id: "Balasan cepat", en: "Fast replies" },
+        body: {
+          id: "Template dan jawaban tersimpan mempercepat balasan untuk pertanyaan yang berulang.",
+          en: "Saved templates and answers speed up replies to questions that keep coming back.",
+        },
+      },
+      {
+        title: { id: "Riwayat per pelanggan", en: "Per-customer history" },
+        body: {
+          id: "Semua percakapan satu pelanggan terkumpul, jadi tidak ada yang perlu mengulang dari awal.",
+          en: "Every conversation with one customer is gathered together, so nobody has to start over.",
+        },
+      },
+    ],
+    gallery: [
+      {
+        src: "/products/tile-saybot.webp",
+        caption: { id: "Ruang kerja perpesanan SayBot.", en: "The SayBot messaging workspace." },
+      },
+      {
+        src: "/products/tile-saybot-2.webp",
+        caption: { id: "Alur kerja dan tahapan pesan.", en: "The workflow and message stages." },
+      },
+      {
+        src: "/products/tile-saybot-3.webp",
+        caption: { id: "Fitur utama SayBot.", en: "SayBot's main features." },
+      },
+      {
+        src: "/products/tile-saybot-4.webp",
+        caption: { id: "Alur kerja dan paket harga.", en: "Workflow and pricing plans." },
+      },
+    ],
+    facts: [
+      { label: { id: "Kategori", en: "Category" }, value: { id: "Komunikasi", en: "Communication" } },
+      { label: { id: "Kanal", en: "Channels" }, value: { id: "4 kanal", en: "4 channels" } },
+      { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
+    ],
+  },
+  {
+    id: "akuntuntas",
+    tagline: {
+      id: "Pembukuan yang akhirnya bisa dituntaskan sendiri.",
+      en: "Bookkeeping you can actually finish on your own.",
+    },
+    problem: {
+      id: "Pemilik usaha kecil tahu uangnya masuk dan keluar, tapi tidak tahu labanya berapa. Software akuntansi yang ada dirancang untuk akuntan — penuh istilah yang harus dipelajari dulu sebelum bisa dipakai.",
+      en: "Small business owners know money comes in and goes out, but not what their profit is. Existing accounting software is built for accountants — full of terms you must learn before you can use it.",
+    },
+    vision: {
+      id: "AkunTuntas dibangun supaya pemilik usaha bisa menutup buku sendiri, tanpa harus paham debit-kredit lebih dulu. Visinya sederhana: laporan keuangan yang bisa dipercaya, dihasilkan oleh orang yang menjalankan bisnisnya sendiri.",
+      en: "AkunTuntas exists so owners can close their own books without first understanding debits and credits. The vision is simple: trustworthy financial reports, produced by the people actually running the business.",
+    },
+    status: { id: "Dipakai internal", en: "In internal use" },
+    features: [
+      {
+        title: { id: "Jurnal yang rapi", en: "Tidy journals" },
+        body: {
+          id: "Pencatatan transaksi harian yang otomatis tersusun ke laporan, bukan buku besar yang harus dijejali manual.",
+          en: "Daily transactions that assemble themselves into reports, rather than a ledger you have to force entries into.",
+        },
+      },
+      {
+        title: { id: "Bagan akun yang jelas", en: "A readable chart of accounts" },
+        body: {
+          id: "Struktur akun yang bisa dipahami orang non-akuntan, dengan nama yang masuk akal.",
+          en: "An account structure a non-accountant can follow, with names that make sense.",
+        },
+      },
+      {
+        title: { id: "Laporan laba rugi", en: "Income statements" },
+        body: {
+          id: "Pendapatan, laba, dan margin dalam satu layar — jawaban atas pertanyaan paling sering pemilik usaha.",
+          en: "Revenue, profit and margin on one screen — the answer to an owner's most common question.",
+        },
+      },
+      {
+        title: { id: "Pemeriksaan kesehatan", en: "Health checks" },
+        body: {
+          id: "Sistem menandai pembukuan yang perlu perhatian, supaya masalah ketahuan sebelum jadi besar.",
+          en: "The system flags bookkeeping that needs attention, so problems surface before they grow.",
+        },
+      },
+    ],
+    gallery: [
+      {
+        src: "/products/tile-akuntuntas.webp",
+        caption: { id: "Laporan keuangan AkunTuntas.", en: "An AkunTuntas financial report." },
+      },
+      {
+        src: "/products/tile-akuntuntas-2.webp",
+        caption: { id: "Jurnal umum.", en: "The general journal." },
+      },
+      {
+        src: "/products/tile-akuntuntas-3.webp",
+        caption: { id: "Bagan akun.", en: "The chart of accounts." },
+      },
+      {
+        src: "/products/tile-akuntuntas-4.webp",
+        caption: { id: "Tampilan analisis pembukuan.", en: "The bookkeeping analysis view." },
+      },
+    ],
+    facts: [
+      { label: { id: "Kategori", en: "Category" }, value: { id: "Alat bisnis", en: "Business tools" } },
+      { label: { id: "Platform", en: "Platform" }, value: { id: "Web", en: "Web" } },
+      { label: { id: "Status", en: "Status" }, value: { id: "Internal", en: "Internal" } },
+    ],
+  },
+  {
+    id: "amara",
+    tagline: {
+      id: "AI yang punya wajah, bukan cuma kotak teks.",
+      en: "An AI with a face, not just a text box.",
+    },
+    problem: {
+      id: "Asisten AI hari ini terasa seperti formulir. Kamu mengetik, membaca, menunggu. Tidak ada kehadiran, tidak ada rasa sedang berbicara dengan sesuatu — padahal yang dibutuhkan banyak orang justru rasa ditemani.",
+      en: "Today's AI assistants feel like a form. You type, read, wait. There is no presence, no sense of talking to something — yet what many people actually want is the feeling of company.",
+    },
+    vision: {
+      id: "Amara mengeksplorasi bentuk lain dari AI: sesuatu yang hadir di desktop, punya avatar, dan bisa diajak bicara dengan suara. Ini eksperimen jangka panjang soal bagaimana komputer bisa terasa menemani tanpa berpura-pura jadi manusia.",
+      en: "Amara explores a different shape for AI: something that lives on your desktop, has an avatar, and can be spoken to. It is a long-running experiment in how a computer can feel companionable without pretending to be human.",
+    },
+    status: { id: "Rilis", en: "Shipped" },
+    features: [
+      {
+        title: { id: "Avatar 3D", en: "A 3D avatar" },
+        body: {
+          id: "Sosok tiga dimensi yang hadir di layar, bukan ikon bulat yang berdenyut.",
+          en: "A three-dimensional presence on screen, not a pulsing round icon.",
+        },
+      },
+      {
+        title: { id: "Percakapan suara", en: "Voice conversation" },
+        body: {
+          id: "Bisa diajak bicara langsung, jadi tangan tetap bebas untuk hal lain.",
+          en: "You can speak to it directly, leaving your hands free for other things.",
+        },
+      },
+      {
+        title: { id: "Aplikasi desktop", en: "A desktop application" },
+        body: {
+          id: "Berjalan sebagai aplikasi Windows sendiri, bukan tab browser yang harus dicari.",
+          en: "Runs as its own Windows application, not a browser tab you have to hunt for.",
+        },
+      },
+    ],
+    gallery: [
+      {
+        src: "/products/tile-amara.webp",
+        caption: {
+          id: "Amara dengan avatar 3D dan panel percakapan.",
+          en: "Amara with its 3D avatar and chat panel.",
+        },
+      },
+    ],
+    facts: [
+      { label: { id: "Kategori", en: "Category" }, value: { id: "Kecerdasan artifisial", en: "Artificial intelligence" } },
+      { label: { id: "Platform", en: "Platform" }, value: { id: "Windows", en: "Windows" } },
+      { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
+    ],
+  },
+  {
+    id: "lumawall",
+    tagline: {
+      id: "Desktop yang bergerak, bukan gambar mati.",
+      en: "A desktop that moves, not a still image.",
+    },
+    problem: {
+      id: "Wallpaper hidup yang ada kebanyakan berat, boros baterai, atau hanya jalan di satu monitor. Begitu pakai dua layar, semuanya berantakan.",
+      en: "Most live wallpaper tools are heavy, drain battery, or only work on one monitor. The moment you use two screens, everything falls apart.",
+    },
+    vision: {
+      id: "LumaWall dibuat untuk desktop yang benar-benar dipakai kerja: banyak monitor, seharian menyala, dan tidak boleh mengganggu. Visinya wallpaper yang hidup tanpa mengorbankan mesin yang menjalankannya.",
+      en: "LumaWall is built for desktops that are actually worked on: many monitors, on all day, and not allowed to get in the way. The vision is a wallpaper that lives without taxing the machine running it.",
+    },
+    status: { id: "Rilis", en: "Shipped" },
+    features: [
+      {
+        title: { id: "Dukungan multi-monitor", en: "Multi-monitor support" },
+        body: {
+          id: "Setiap layar bisa punya wallpaper sendiri, dengan pengaturan per monitor.",
+          en: "Each screen can carry its own wallpaper, with per-monitor settings.",
+        },
+      },
+      {
+        title: { id: "Katalog wallpaper", en: "A wallpaper catalog" },
+        body: {
+          id: "Galeri bawaan yang bisa ditelusuri, bukan folder yang harus diisi sendiri.",
+          en: "A built-in gallery you can browse, not a folder you must fill yourself.",
+        },
+      },
+      {
+        title: { id: "Ringan saat dipakai kerja", en: "Light under real work" },
+        body: {
+          id: "Dirancang supaya tetap jalan saat aplikasi berat sedang terbuka.",
+          en: "Designed to keep running while heavy applications are open.",
+        },
+      },
+    ],
+    gallery: [
+      {
+        src: "/products/tile-lumawall.webp",
+        caption: {
+          id: "LumaWall dengan galeri wallpaper dan kontrol monitor.",
+          en: "LumaWall with its wallpaper gallery and monitor controls.",
+        },
+      },
+    ],
+    facts: [
+      { label: { id: "Kategori", en: "Category" }, value: { id: "Alat desktop", en: "Desktop tools" } },
+      { label: { id: "Platform", en: "Platform" }, value: { id: "Windows", en: "Windows" } },
+      { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
+    ],
+  },
+];
+
+/** Look up one project's detail, or undefined when the id is unknown. */
+export function getProjectDetail(id: string): ProjectDetail | undefined {
+  return PROJECT_DETAILS.find((p) => p.id === id);
+}
+
+/** The product row for one id, or undefined. */
+export function getProduct(id: string): Product | undefined {
+  return PRODUCTS.find((p) => p.id === id);
+}
+
 export const CAPABILITIES: {
   n: string;
   title: Bi;
@@ -304,6 +672,7 @@ export const COPY = {
     heading: { id: "Produk kami", en: "Our products" },
     soon: { id: "Segera hadir", en: "Coming soon" },
     external: { id: "buka di tab baru", en: "opens in a new tab" },
+    liveSite: { id: "Situs langsung", en: "Live site" },
   },
   strip: {
     heading: { id: "Produk yang dibangun di dalam Xinet.", en: "Products built within Xinet." },
