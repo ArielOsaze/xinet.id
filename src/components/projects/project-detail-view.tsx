@@ -158,23 +158,42 @@ export function ProjectDetailView({
               grid (7 + 5 + 5), so they get their own row. */}
           {detail.facts && (
             <div className="mt-14">
+              {/* Label above value, not label-left / value-right.
+                  Stretching the two apart across three equal columns left a wide
+                  dead gap in the middle of every cell, which made the strip read
+                  as a stretched wireframe rather than as a set of facts. The
+                  cells also cascade in (staggered delay) instead of all landing
+                  at once, and each value brightens on hover. */}
               <dl className="border-line grid grid-cols-1 border-t sm:grid-cols-3">
-                  {detail.facts.map((f) => (
-                    <AnimatedContent
-                      key={f.label.en}
-                      distance={18}
-                      duration={0.6}
-                      delay={0.08}
-                      threshold={0.2}
-                      className="border-line border-b sm:border-r sm:last:border-r-0"
-                    >
-                      <div className="flex items-baseline justify-between gap-4 px-1 py-4">
-                        <dt className="text-ink-subtle text-[0.75rem] tracking-[0.1em] uppercase">
-                          {t(f.label)}
-                        </dt>
-                        <dd className="text-ink text-[0.9375rem] font-medium">{t(f.value)}</dd>
-                      </div>
-                    </AnimatedContent>
+                {detail.facts.map((f, i) => (
+                  <AnimatedContent
+                    key={f.label.en}
+                    distance={18}
+                    duration={0.6}
+                    delay={i * 0.12}
+                    threshold={0.2}
+                    className={cn(
+                      "border-line group relative border-b sm:border-r sm:last:border-r-0",
+                      i > 0 && "sm:pl-6"
+                    )}
+                  >
+                    {/* An accent line that draws itself across the cell on hover.
+                        scaleX from 0, so it grows from the left instead of
+                        fading in, which reads as the strip answering the
+                        pointer. */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-[#22c7e8] transition-transform duration-500 ease-out group-hover:scale-x-100"
+                    />
+                    <div className="py-5 sm:pr-6">
+                      <dt className="text-ink-subtle text-[0.6875rem] tracking-[0.14em] uppercase">
+                        {t(f.label)}
+                      </dt>
+                      <dd className="text-ink mt-2 text-[1.0625rem] font-medium tracking-[-0.01em] transition-colors duration-300 group-hover:text-white">
+                        {t(f.value)}
+                      </dd>
+                    </div>
+                  </AnimatedContent>
                 ))}
               </dl>
             </div>

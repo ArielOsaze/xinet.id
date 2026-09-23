@@ -187,7 +187,11 @@ export function HeroBackground() {
               // Fed from the window listener above, because this layer is
               // pointer-events-none and can never see the cursor itself.
               mouse={pointer}
-              mouseInfluence={0.55}
+              // A local warp reads far stronger than the old global slide, so
+              // the displacement is smaller and confined to a radius around the
+              // cursor. Outside it the aurora is untouched.
+              mouseInfluence={0.3}
+              mouseRadius={0.32}
             />
           </div>
 
@@ -211,7 +215,8 @@ export function HeroBackground() {
               // influence so the two layers parallax against each other instead
               // of moving as one flat sheet.
               mouse={pointer}
-              mouseInfluence={0.3}
+              mouseInfluence={0.2}
+              mouseRadius={0.24}
             />
           </div>
         </div>

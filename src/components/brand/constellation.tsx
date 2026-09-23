@@ -138,12 +138,13 @@ export function Constellation({ className }: { className?: string }) {
     let tabVisible = true;
     const started = performance.now();
 
-    // Pointer parallax: eased toward the target each frame.
-    //   x / y   = the eased parallax offset applied to the field
-    //   tx / ty = its target
-    //   nx / ny = the pointer's position inside the canvas, normalised 0..1,
-    //             used to light up the stars nearest the cursor
-    const pointer = { x: 0, y: 0, tx: 0, ty: 0, nx: 0.5, ny: 0.5 };
+    // Cursor state for the LOCAL effect.
+    //   nx / ny = where the cursor is inside the canvas, normalised 0..1
+    //   ex / ey = the eased position actually used for drawing, so the reaction
+    //             trails the pointer slightly instead of snapping to it
+    //   has     = false until the pointer has been seen at least once, so the
+    //             field does not react to a cursor sitting at the origin
+    const pointer = { nx: 0.5, ny: 0.5, ex: 0.5, ey: 0.5, has: false };
 
     let motes: Mote[] = [];
     let field: FieldStar[] = [];
@@ -224,19 +225,47 @@ export function Constellation({ className }: { className?: string }) {
       // Leaves ~12% margin, which is where the outer glows live.
       const scale = Math.min(w, h) * 0.38;
 
-      pointer.x += (pointer.tx - pointer.x) * 0.05;
-      pointer.y += (pointer.ty - pointer.y) * 0.05;
+      // Ease the drawn cursor toward the real one.
+      pointer.ex += (pointer.nx - pointer.ex) * 0.08;
+      pointer.ey += (pointer.ny - pointer.ey) * 0.08;
 
       const cos = Math.cos(TILT);
       const sin = Math.sin(TILT);
 
+      // No global offset here any more: the whole field used to slide with the
+      // pointer, which moved every star including ones nowhere near the cursor.
+      // Local displacement is applied per star further down.
       const project = (sx: number, sy: number) => {
         const rx = sx * cos - sy * sin;
         const ry = sx * sin + sy * cos;
         return {
-          x: cx + rx * scale + pointer.x,
-          y: cy - ry * scale + pointer.y,
+          x: cx + rx * scale,
+          y: cy - ry * scale,
         };
+      };
+
+      /**
+       * Push a point away from the cursor, with a Gaussian falloff.
+       *
+       * Returns the point unchanged when it is far away, so distant stars keep
+       * their exact positions and the constellation's shape never distorts as a
+       * whole. Only the neighbourhood of the cursor reacts.
+       */
+      const cursorX = pointer.ex * w;
+      const cursorY = pointer.ey * h;
+      const LOCAL_R = Math.min(w, h) * 0.2;
+      const localPush = (x: number, y: number, amount: number) => {
+        const dx = x - cursorX;
+        const dy = y - cursorY;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        // Windowed falloff: exactly zero at LOCAL_R, so stars outside the
+        // cursor's neighbourhood do not move at all. A Gaussian tail kept
+        // nudging distant stars, which made the whole field look like it was
+        // sliding instead of only the area around the cursor reacting.
+        if (d >= LOCAL_R || d < 0.001) return { x, y };
+        const w = 1 - d / LOCAL_R;
+        const f = w * w * (3 - 2 * w);
+        return { x: x + (dx / d) * f * amount, y: y + (dy / d) * f * amount };
       };
 
       // --- nebula wash ----------------------------------------------------
@@ -252,8 +281,10 @@ export function Constellation({ className }: { className?: string }) {
       // field read as depth instead of as uniform noise.
       for (const s of field) {
         const tw = still ? 1 : 0.55 + 0.45 * Math.sin(time * 0.7 + s.phase);
-        const px2 = s.x * w + pointer.x * 0.35;
-        const py2 = s.y * h + pointer.y * 0.35;
+        // Only stars near the cursor drift; the rest hold still.
+        const moved = localPush(s.x * w, s.y * h, 14);
+        const px2 = moved.x;
+        const py2 = moved.y;
         const a = s.a * tw;
 
         if (s.tier === 2) {
@@ -290,13 +321,8 @@ export function Constellation({ className }: { className?: string }) {
         ctx.globalAlpha = 0.06 + twinkle * 0.18;
         ctx.fillStyle = m.warm ? "#ffe6c8" : "#cfe6ef";
         ctx.beginPath();
-        ctx.arc(
-          m.x * w + pointer.x * 0.6,
-          m.y * h + pointer.y * 0.6,
-          m.r,
-          0,
-          Math.PI * 2
-        );
+        const mm = localPush(m.x * w, m.y * h, 22);
+        ctx.arc(mm.x, mm.y, m.r, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -309,8 +335,10 @@ export function Constellation({ className }: { className?: string }) {
       if (lineProgress > 0) {
         ctx.globalAlpha = lineProgress * 0.9;
         for (const [a, b] of AXES) {
-          const p1 = project(STARS[a].x, STARS[a].y);
-          const p2 = project(STARS[b].x, STARS[b].y);
+          // Same local push the stars themselves get, so the lines stay
+          // attached to their endpoints instead of detaching near the cursor.
+          const p1 = localPush(project(STARS[a].x, STARS[a].y).x, project(STARS[a].x, STARS[a].y).y, 11);
+          const p2 = localPush(project(STARS[b].x, STARS[b].y).x, project(STARS[b].x, STARS[b].y).y, 11);
           const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
           // Near-white, with the faintest cyan at the midpoint so the lines
           // still read as the brand's light rather than as grey wire.
@@ -348,7 +376,10 @@ export function Constellation({ className }: { className?: string }) {
       const NEAR = Math.min(w, h) * 0.42;
 
       STARS.forEach((s, i) => {
-        const final = project(s.x, s.y);
+        const anchored = project(s.x, s.y);
+        // A small lean away from the cursor: enough to feel responsive, small
+        // enough that the constellation never loses its shape.
+        const final = localPush(anchored.x, anchored.y, 11);
 
         const distToPointer = Math.hypot(final.x - px, final.y - py);
         const near = clamp01(1 - distToPointer / NEAR);
@@ -477,15 +508,12 @@ export function Constellation({ className }: { className?: string }) {
     const onPointerMove = (e: PointerEvent) => {
       const r = host.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      const dx = (e.clientX - (r.left + r.width / 2)) / r.width;
-      const dy = (e.clientY - (r.top + r.height / 2)) / r.height;
-      pointer.tx = Math.max(-1, Math.min(1, dx)) * -12;
-      pointer.ty = Math.max(-1, Math.min(1, dy)) * -12;
-      // Position inside the canvas, for the proximity highlight. Values outside
-      // 0..1 mean the cursor has left the field, which fades the effect out
-      // naturally because every distance becomes large.
+      // Position inside the canvas. Values outside 0..1 mean the cursor has
+      // left the field, which fades the effect out naturally because every
+      // distance becomes large.
       pointer.nx = (e.clientX - r.left) / r.width;
       pointer.ny = (e.clientY - r.top) / r.height;
+      pointer.has = true;
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
 

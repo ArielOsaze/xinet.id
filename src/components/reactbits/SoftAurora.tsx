@@ -16,6 +16,8 @@ interface SoftAuroraProps {
   colorSpeed?: number;
   enableMouseInteraction?: boolean;
   mouseInfluence?: number;
+  /** Radius of the pointer's local effect, in units of the canvas height. */
+  mouseRadius?: number;
   lightMode?: boolean;
   /**
    * Pointer position normalised to the container, driven by the parent.
@@ -63,6 +65,7 @@ uniform float uLayerOffset;
 uniform float uColorSpeed;
 uniform vec2 uMouse;
 uniform float uMouseInfluence;
+uniform float uMouseRadius;
 uniform bool uEnableMouse;
 uniform float uLightMode;
 
@@ -153,9 +156,32 @@ void main() {
   vec2 uv = gl_FragCoord.xy / uResolution.xy;
   float t = uSpeed * 0.4 * uTime;
 
+  // A LOCAL warp, not a global slide.
+  //
+  // This used to translate the entire aurora band by the pointer offset, so the
+  // cursor dragged the whole sky sideways. Now the displacement is weighted by
+  // distance from the cursor and vanishes outside uMouseRadius, so only the part
+  // of the aurora near the pointer reacts and the rest keeps its own drift.
   vec2 shift = vec2(0.0);
   if (uEnableMouse) {
-    shift = (uMouse - 0.5) * uMouseInfluence;
+    // auroraGlow works in units of resolution.y, so the mouse is converted to
+    // the same space before measuring distance.
+    vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
+    vec2 m = uMouse * aspect;
+    vec2 p = gl_FragCoord.xy / uResolution.y;
+    vec2 toM = p - m;
+    float dist = length(toM);
+    // Windowed falloff, NOT a Gaussian.
+    //
+    // A Gaussian only approaches zero, so at 1.5x the radius it still passed
+    // ~9% of the influence, which stayed visible a few hundred pixels from the
+    // cursor: the effect looked global. Smoothstep reaches exactly zero AT the
+    // radius, so the reaction is confined to the cursor's neighbourhood and
+    // nothing outside it moves at all.
+    float window = clamp(1.0 - dist / max(uMouseRadius, 0.0001), 0.0, 1.0);
+    float falloff = window * window * (3.0 - 2.0 * window);
+    // Push outward from the cursor, so the band bulges around it.
+    shift = normalize(toM + vec2(0.0001)) * falloff * uMouseInfluence;
   }
 
   float glow1 = auroraGlow(t, shift);
@@ -202,6 +228,7 @@ export default function SoftAurora({
   colorSpeed = 1.0,
   enableMouseInteraction = true,
   mouseInfluence = 0.25,
+  mouseRadius = 0.45,
   lightMode = false,
   mouse,
 }: SoftAuroraProps) {
@@ -264,6 +291,7 @@ export default function SoftAurora({
         uColorSpeed: { value: colorSpeed },
         uMouse: { value: new Float32Array([0.5, 0.5]) },
         uMouseInfluence: { value: mouseInfluence },
+        uMouseRadius: { value: mouseRadius },
         uEnableMouse: { value: enableMouseInteraction },
         uLightMode: { value: lightMode ? 1 : 0 }
       }
@@ -313,7 +341,7 @@ export default function SoftAurora({
       container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [speed, scale, brightness, color1, color2, noiseFrequency, noiseAmplitude, bandHeight, bandSpread, octaveDecay, layerOffset, colorSpeed, enableMouseInteraction, mouseInfluence, lightMode]);
+  }, [speed, scale, brightness, color1, color2, noiseFrequency, noiseAmplitude, bandHeight, bandSpread, octaveDecay, layerOffset, colorSpeed, enableMouseInteraction, mouseInfluence, mouseRadius, lightMode]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 }
