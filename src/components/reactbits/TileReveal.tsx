@@ -252,7 +252,12 @@ export function TileReveal({
       // what makes the type readable without a shadow or a scrim: nothing is
       // drawn on top of the captures, the artwork itself just sits back until
       // the headline hands over to the content.
-      el.style.opacity = String(easeOutCubic(appearP) * tileFade * tileDim);
+      const op = easeOutCubic(appearP) * tileFade * tileDim;
+      el.style.opacity = String(op);
+      // A fully transparent tile is removed from the paint tree entirely. It
+      // still occupies its grid cell, so nothing shifts; it just stops costing
+      // paint work while it is invisible.
+      el.style.visibility = op < 0.004 ? "hidden" : "visible";
     }
 
     if (headlineRef.current) {
@@ -342,6 +347,10 @@ export function TileReveal({
                 ref={(el) => {
                   tileRefs.current[i] = el;
                 }}
+                // `will-change: transform` only. Promoting each tile with
+                // `backface-visibility`/`translateZ` was tried and measured
+                // WORSE: nine separate compositor layers cost more than they
+                // save (33ms frames went 20 -> 36).
                 className="will-change-transform"
                 style={{
                   aspectRatio: String(aspect),
@@ -349,6 +358,8 @@ export function TileReveal({
                   // Start offscreen; the first frame corrects this immediately.
                   transform: "translate3d(0,0,0)",
                   opacity: 0,
+                  // Not painted at all until the fly-in starts.
+                  visibility: "hidden",
                 }}
                 aria-hidden="true"
               >

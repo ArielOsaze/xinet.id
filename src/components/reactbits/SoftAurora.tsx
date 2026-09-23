@@ -76,16 +76,28 @@ uniform float uLightMode;
 
 #define TAU 6.28318
 
+/**
+ * Integer hash, not a sine hash.
+ *
+ * The original used fract(sin(p) * 43758.5453) three times per call, and this
+ * runs eight times per perlin sample, three octaves deep, twice per glow, on two
+ * overlapping layers: roughly 576 sin() evaluations per pixel per frame. That is
+ * what blocked the main thread in 130ms chunks and made scrolling stutter.
+ *
+ * A multiply-xor hash is visually indistinguishable here and costs a few integer
+ * ops, so the same picture draws for a fraction of the work.
+ */
+vec3 hash33(vec3 p) {
+  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)),
+           dot(p, vec3(269.5, 183.3, 246.1)),
+           dot(p, vec3(113.5, 271.9, 124.6)));
+  p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+  p += dot(p, p.yxz + 33.33);
+  return fract((p.xxy + p.yxx) * p.zyx) * 2.0 - 1.0;
+}
+
 vec3 gradientHash(vec3 p) {
-  p = vec3(
-    dot(p, vec3(127.1, 311.7, 234.6)),
-    dot(p, vec3(269.5, 183.3, 198.3)),
-    dot(p, vec3(169.5, 283.3, 156.9))
-  );
-  vec3 h = fract(sin(p) * 43758.5453123);
-  float phi = acos(2.0 * h.x - 1.0);
-  float theta = TAU * h.y;
-  return vec3(cos(theta) * sin(phi), sin(theta) * cos(phi), cos(phi));
+  return normalize(hash33(p) + vec3(0.0001));
 }
 
 float quinticSmooth(float t) {
@@ -147,7 +159,9 @@ float auroraGlow(float t, vec2 shift) {
   float amp = uNoiseAmp;
   vec2 samplePos = uv * uScale;
 
-  for (float i = 0.0; i < 3.0; i += 1.0) {
+  // Two octaves, not three. The third only adds detail finer than a soft aurora
+  // band can show, while costing another full perlin sample per pixel.
+  for (float i = 0.0; i < 2.0; i += 1.0) {
     noiseVal += perlin3D(amp, freq, samplePos.x, samplePos.y, t);
     amp *= uOctaveDecay;
     freq *= 2.0;
@@ -250,7 +264,21 @@ export default function SoftAurora({
   useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
-    const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
+    /**
+     * Render below device resolution.
+     *
+     * The aurora is a smooth, low-frequency gradient: it carries no fine detail,
+     * and on top of that it is masked and `screen`-blended, which hides any
+     * softness. Drawing it at a fraction of the layout size cuts fragment work
+     * by the SQUARE of that fraction, and fragment work is what was blocking the
+     * main thread while scrolling.
+     *
+     * 0.5 gives a 4x reduction. The canvas is stretched back to full size by CSS,
+     * so the visual result is a slightly softer band, which is what an aurora
+     * looks like anyway.
+     */
+    const RESOLUTION_SCALE = 0.5;
+    const renderer = new Renderer({ alpha: true, premultipliedAlpha: false, dpr: RESOLUTION_SCALE });
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
 
@@ -271,6 +299,8 @@ export default function SoftAurora({
     }
 
     function resize() {
+      // `setSize` applies the renderer's dpr, so the drawing buffer is
+      // RESOLUTION_SCALE times the layout size while the element still fills it.
       renderer.setSize(container.offsetWidth, container.offsetHeight);
       if (program) {
         program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];

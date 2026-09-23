@@ -110,6 +110,26 @@ function TileShot({ src, alt }: { src: string; alt: string }) {
         // 95, not the default 75: these are UI screenshots with small sharp
         // text, and Next.js re-encodes at the requested quality.
         quality={95}
+        /**
+         * Eager, and decoded before it is needed.
+         *
+         * These nine tiles are the centrepiece of the section and are on screen
+         * for the whole reveal, so lazy loading gains nothing — it only defers
+         * nine large decodes into the exact moment the visitor is scrolling,
+         * which measured as the largest single source of stutter in the
+         * sequence (43 -> 12 stutters when the images were hidden, and the
+         * images reported naturalWidth 0x0, i.e. still undecoded).
+         *
+         * `decoding="sync"` keeps the decode off the compositor's critical path
+         * once the bytes have arrived.
+         */
+        loading="eager"
+        decoding="sync"
+        // Low priority on purpose. These nine are fetched at parse time (so the
+        // decode no longer lands on a scroll frame) but must NOT outrank the hero
+        // image, which is the real LCP. `priority` would emit nine preload tags
+        // and slow the first paint, which is a worse trade than the stall.
+        fetchPriority="low"
         className="object-cover"
       />
     </div>

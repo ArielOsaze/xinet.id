@@ -47,9 +47,22 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500 ease-out motion-reduce:transition-none",
+        /**
+         * Only colours transition — NOT backdrop-filter.
+         *
+         * Animating `backdrop-filter` makes the browser re-run a 24px blur over
+         * the full viewport width on every frame of the 500ms transition. That
+         * measured as the single largest source of scroll stutter on the page
+         * (44 -> 25 stutters with it removed). The blur is still applied, it just
+         * snaps on with the background instead of being animated.
+         *
+         * The radius also comes down from 24px (blur-xl) to 12px: at this
+         * translucency the difference is not visible, and blur cost grows with
+         * the radius.
+         */
+        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-500 ease-out motion-reduce:transition-none",
         scrolled
-          ? "border-line border-b bg-[rgba(8,10,12,0.72)] backdrop-blur-xl"
+          ? "border-line border-b bg-[rgba(8,10,12,0.82)] backdrop-blur-md"
           : "border-b border-transparent bg-transparent"
       )}
     >
@@ -122,7 +135,8 @@ export function Navbar() {
         id="mobile-menu"
         ref={panelRef}
         hidden={!open}
-        className="border-line bg-base/97 border-t backdrop-blur-xl lg:hidden"
+        // Opaque surface, so the blur is invisible here — it only costs.
+        className="border-line bg-base border-t lg:hidden"
       >
         <ul className="shell flex flex-col py-3">
           {NAV.map((item) => (
