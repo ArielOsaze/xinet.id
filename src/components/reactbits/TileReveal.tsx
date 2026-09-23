@@ -195,6 +195,13 @@ export function TileReveal({
     const clearEased = easeInOutCubic(clearP);
     const tileFade = 1 - clamp01((clearP - 0.45) / 0.55);
 
+    // How much the tiles sit back while the headline is held over them. This is
+    // what keeps the headline readable WITHOUT a shadow or a scrim: nothing is
+    // drawn on top of the captures, the artwork itself just dims until the
+    // headline hands over to the content.
+    const headlineFade = 1 - clamp01((p - ZOOM_END) / 0.12);
+    const tileDim = 1 - 0.42 * headlineFade;
+
     for (let i = 0; i < activeItems.length; i++) {
       const el = tileRefs.current[i];
       if (!el) continue;
@@ -225,12 +232,14 @@ export function TileReveal({
       const clearY = rowOffset * 0.12 * viewportH * clearEased * motionScale;
 
       el.style.transform = `translate3d(${flyX + clearX}px, ${clearY}px, 0)`;
-      el.style.opacity = String(flyP > 0 ? tileFade : 0);
+      // The tiles dim slightly while the headline is held over them. This is
+      // what makes the type readable without a shadow or a scrim: nothing is
+      // drawn on top of the captures, the artwork itself just sits back until
+      // the headline hands over to the content.
+      el.style.opacity = String(flyP > 0 ? tileFade * tileDim : 0);
     }
 
-    // Headline holds through the fly-in and zoom, then hands over to the content.
     if (headlineRef.current) {
-      const headlineFade = 1 - clamp01((p - ZOOM_END) / 0.12);
       headlineRef.current.style.opacity = String(headlineFade);
       headlineRef.current.style.transform = `scale(${1 + 0.04 * zoomP})`;
       headlineRef.current.style.pointerEvents = headlineFade < 0.1 ? "none" : "auto";
@@ -334,38 +343,19 @@ export function TileReveal({
         </div>
 
         {/* Headline, held over the tiles.
-            Legibility comes from a TIGHT text shadow that follows the glyphs,
-            plus a small, light scrim — not from a large dark box. An earlier
-            version used a wide, near-opaque scrim, which read as a black cloud
-            sitting on top of the product tiles and hid the very screenshots the
-            section is meant to show.
-            The scrim is now barely there and does the least work: the halo that
-            makes the type readable is attached to each glyph, so the darkening
-            follows the letters instead of blanketing a rectangle of tiles. */}
+            No shadow and no scrim: both were tried and both read as a smudge
+            sitting on top of the product captures. Readability comes from the
+            tiles themselves instead — the grid dims while the headline is up
+            (see `tileDim` in the frame loop), so the type sits on a darker
+            surface without anything being drawn over the artwork.
+            Typography matches the site's other large headings. */}
         {headline && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center px-6">
-            <div className="relative isolate max-w-4xl">
-              <div
-                aria-hidden="true"
-                className="absolute -inset-x-4 -inset-y-3 -z-10 rounded-[3rem]"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at center, rgba(8,10,12,0.34) 0%, rgba(8,10,12,0.18) 52%, rgba(8,10,12,0) 80%)",
-                }}
-              />
-              <div
-                ref={headlineRef}
-                className="text-center text-[clamp(1.75rem,6vw,4.5rem)] leading-[1.06] font-semibold tracking-[-0.04em]"
-                style={{
-                  // The readability work happens here: a tight dark edge around
-                  // every glyph. Because it tracks the letterforms, the tiles
-                  // between and around the words stay visible.
-                  textShadow:
-                    "0 0 2px rgba(8,10,12,1), 0 0 6px rgba(8,10,12,0.95), 0 1px 12px rgba(8,10,12,0.8), 0 2px 22px rgba(8,10,12,0.55)",
-                }}
-              >
-                {headline}
-              </div>
+            <div
+              ref={headlineRef}
+              className="max-w-4xl text-center font-sans text-[clamp(2rem,5vw,3.75rem)] leading-[1.05] font-semibold tracking-[-0.035em]"
+            >
+              {headline}
             </div>
           </div>
         )}

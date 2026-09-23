@@ -15,7 +15,7 @@ import { join } from "path";
  * The wordmark is inlined as a data URL because ImageResponse cannot read from
  * the filesystem at render time.
  */
-export const alt = "Xinet — Build what's next. A digital product company.";
+export const alt = "Xinet · Build what's next. A digital product company.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 // Node runtime: the wordmark is read from disk and inlined as a data URL.
@@ -182,7 +182,7 @@ export default function OpengraphImage() {
                 display: "flex",
               }}
             >
-              We build digital products for real-world problems — commerce,
+              We build digital products for real-world problems: commerce,
               communication, business tools and automation.
             </div>
           </div>

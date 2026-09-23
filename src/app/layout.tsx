@@ -13,7 +13,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 const SITE_URL = "https://xinet.id";
-const TITLE = "Xinet — Build What's Next";
+const TITLE = "Xinet · Build What's Next";
 const DESCRIPTION =
   "Xinet is a digital product company building products across commerce, communication, business tools, automation and emerging technology.";
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: TITLE,
-    template: "%s — Xinet",
+    template: "%s · Xinet",
   },
   description: DESCRIPTION,
   applicationName: "Xinet",

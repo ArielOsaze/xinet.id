@@ -77,8 +77,8 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
   const ctaLabel = t(product.cta);
   const ariaLabel =
     lang === "id"
-      ? `${ctaLabel} — buka di tab baru`
-      : `${ctaLabel} — opens in a new tab`;
+      ? `${ctaLabel} · buka di tab baru`
+      : `${ctaLabel} · opens in a new tab`;
 
   const inner = (
     <GlareHover

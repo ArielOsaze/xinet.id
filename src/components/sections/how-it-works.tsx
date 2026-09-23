@@ -23,8 +23,8 @@ const STEPS: { n: string; title: { id: string; en: string }; body: { id: string;
     n: "01",
     title: { id: "Temukan masalahnya", en: "Find the problem" },
     body: {
-      id: "Kami mulai dari masalah nyata yang orang sudah hadapi setiap hari — bukan dari teknologi yang sedang ramai.",
-      en: "We start from a real problem people already face every day — not from whatever technology is trending.",
+      id: "Kami mulai dari masalah nyata yang orang sudah hadapi setiap hari, bukan dari teknologi yang sedang ramai.",
+      en: "We start from a real problem people already face every day, not from whatever technology is trending.",
     },
   },
   {
@@ -47,8 +47,8 @@ const STEPS: { n: string; title: { id: string; en: string }; body: { id: string;
     n: "04",
     title: { id: "Jalankan dan rawat", en: "Run and maintain it" },
     body: {
-      id: "Produk yang sudah jalan terus dirawat — diperbaiki, dipercepat, dan dikembangkan. Rilis bukan garis akhir.",
-      en: "A shipped product keeps getting maintained — fixed, made faster, extended. Launch is not the finish line.",
+      id: "Produk yang sudah jalan terus dirawat: diperbaiki, dipercepat, dan dikembangkan. Rilis bukan garis akhir.",
+      en: "A shipped product keeps getting maintained: fixed, made faster, extended. Launch is not the finish line.",
     },
   },
 ];

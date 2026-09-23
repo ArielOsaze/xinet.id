@@ -1,5 +1,5 @@
 /**
- * Xinet — bilingual content dictionary (ID / EN).
+ * Xinet bilingual content dictionary (ID / EN).
  * Every user-facing string lives here so copy stays consistent and auditable.
  */
 
@@ -64,8 +64,8 @@ export const PRODUCTS: Product[] = [
     shot: "/products/saybot.webp",
     shotTitle: "saybot.nexshop.cloud",
     shotAlt: {
-      id: "Halaman SayBot yang menjelaskan penyatuan WhatsApp, Telegram, Email, dan Chat Website dalam satu alur kerja.",
-      en: "SayBot landing page describing WhatsApp, Telegram, Email and Website Chat unified in one workflow.",
+      id: "Halaman depan SayBot yang menjelaskan penyatuan WhatsApp, Telegram, Email, dan Chat Website.",
+      en: "The SayBot landing page describing WhatsApp, Telegram, Email and Website Chat unified.",
     },
   },
   {
@@ -80,7 +80,7 @@ export const PRODUCTS: Product[] = [
     url: null,
     hue: "167 139 250",
     shot: "/products/akuntuntas.webp",
-    shotTitle: "AkunTuntas — Laporan Keuangan",
+    shotTitle: "AkunTuntas · Laporan Keuangan",
     shotAlt: {
       id: "Layar laporan laba rugi AkunTuntas dengan ringkasan pendapatan, laba, dan margin.",
       en: "AkunTuntas income statement screen showing revenue, profit and margin summaries.",
@@ -98,7 +98,7 @@ export const PRODUCTS: Product[] = [
     url: null,
     hue: "196 181 253",
     shot: "/products/amara.webp",
-    shotTitle: "Amara — AI Assistant",
+    shotTitle: "Amara · AI Assistant",
     shotAlt: {
       id: "Aplikasi Amara AI Assistant menampilkan avatar 3D dan panel percakapan.",
       en: "Amara AI Assistant app showing its 3D avatar and chat panel.",
@@ -116,10 +116,10 @@ export const PRODUCTS: Product[] = [
     url: null,
     hue: "125 211 252",
     shot: "/products/lumawall.webp",
-    shotTitle: "LumaWall — Desktop Engine",
+    shotTitle: "LumaWall · Desktop Engine",
     shotAlt: {
-      id: "Aplikasi LumaWall menampilkan galeri wallpaper dan pengaturan monitor.",
-      en: "LumaWall app showing its wallpaper gallery and monitor controls.",
+      id: "Katalog wallpaper LumaWall dengan pilihan monitor.",
+      en: "The LumaWall wallpaper catalog with monitor selection.",
     },
   },
 ];
@@ -137,7 +137,7 @@ export const STRIP: string[] = [
  * Per-product detail, shown on /projects/<id>.
  *
  * These pages exist so a visitor can click a card and actually see what the
- * product IS — the problem it answers, the vision behind it, what it does today,
+ * product IS: the problem it answers, the vision behind it, what it does today,
  * and real captures of it running. Everything here is derived from the shipped
  * products; no roadmap items are presented as features, and no metric is
  * invented.
@@ -148,7 +148,7 @@ export type ProjectDetail = {
   tagline: Bi;
   /** The problem this product exists to solve. */
   problem: Bi;
-  /** The vision — where it is going and why it matters. */
+  /** The vision: where it is going and why it matters. */
   vision: Bi;
   /** What it does today, as shipped. */
   features: { title: Bi; body: Bi }[];
@@ -172,8 +172,8 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       en: "Buying game top-ups and digital products in Indonesia is still full of steps: manual transfer, confirmation over chat, then waiting with no clarity. Buyers cannot tell whether their order is being processed, and sellers spend their day answering the same questions.",
     },
     vision: {
-      id: "NexShop dibangun supaya jarak antara \"aku mau beli\" dan \"pesananku selesai\" sesingkat mungkin — tanpa chat, tanpa menunggu tanpa kabar. Ke depan, NexShop jadi tulang punggung commerce digital Xinet: satu tempat untuk produk, pembayaran, dan reseller yang semuanya jalan otomatis.",
-      en: "NexShop exists to make the distance between \"I want to buy\" and \"my order is done\" as short as possible — no chat, no silent waiting. Going forward it becomes the backbone of Xinet's digital commerce: one place for products, payments and resellers, all running automatically.",
+      id: "NexShop dibangun supaya jarak antara \"aku mau beli\" dan \"pesananku selesai\" sesingkat mungkin: tanpa chat, tanpa menunggu tanpa kabar. Ke depan, NexShop jadi tulang punggung commerce digital Xinet: satu tempat untuk produk, pembayaran, dan reseller yang semuanya jalan otomatis.",
+      en: "NexShop exists to make the distance between \"I want to buy\" and \"my order is done\" as short as possible: no chat, no silent waiting. Going forward it becomes the backbone of Xinet's digital commerce: one place for products, payments and resellers, all running automatically.",
     },
     status: {
       id: "Berjalan & melayani pesanan nyata",
@@ -293,19 +293,19 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
     gallery: [
       {
         src: "/products/tile-saybot.webp",
-        caption: { id: "Ruang kerja perpesanan SayBot.", en: "The SayBot messaging workspace." },
+        caption: { id: "Halaman depan SayBot dan alur kerjanya.", en: "The SayBot landing page and its workflow." },
       },
       {
         src: "/products/tile-saybot-2.webp",
-        caption: { id: "Alur kerja dan tahapan pesan.", en: "The workflow and message stages." },
+        caption: { id: "Tahapan pengiriman dan kotak masuk gabungan.", en: "Delivery stages and the unified inbox." },
       },
       {
         src: "/products/tile-saybot-3.webp",
-        caption: { id: "Fitur utama SayBot.", en: "SayBot's main features." },
+        caption: { id: "Paket harga SayBot.", en: "SayBot pricing plans." },
       },
       {
         src: "/products/tile-saybot-4.webp",
-        caption: { id: "Alur kerja dan paket harga.", en: "Workflow and pricing plans." },
+        caption: { id: "Halaman masuk ke ruang kerja.", en: "The workspace sign-in page." },
       },
     ],
     facts: [
@@ -321,8 +321,8 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       en: "Bookkeeping you can actually finish on your own.",
     },
     problem: {
-      id: "Pemilik usaha kecil tahu uangnya masuk dan keluar, tapi tidak tahu labanya berapa. Software akuntansi yang ada dirancang untuk akuntan — penuh istilah yang harus dipelajari dulu sebelum bisa dipakai.",
-      en: "Small business owners know money comes in and goes out, but not what their profit is. Existing accounting software is built for accountants — full of terms you must learn before you can use it.",
+      id: "Pemilik usaha kecil tahu uangnya masuk dan keluar, tapi tidak tahu labanya berapa. Software akuntansi yang ada dirancang untuk akuntan, penuh istilah yang harus dipelajari dulu sebelum bisa dipakai.",
+      en: "Small business owners know money comes in and goes out, but not what their profit is. Existing accounting software is built for accountants, full of terms you must learn before you can use it.",
     },
     vision: {
       id: "AkunTuntas dibangun supaya pemilik usaha bisa menutup buku sendiri, tanpa harus paham debit-kredit lebih dulu. Visinya sederhana: laporan keuangan yang bisa dipercaya, dihasilkan oleh orang yang menjalankan bisnisnya sendiri.",
@@ -347,8 +347,8 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       {
         title: { id: "Laporan laba rugi", en: "Income statements" },
         body: {
-          id: "Pendapatan, laba, dan margin dalam satu layar — jawaban atas pertanyaan paling sering pemilik usaha.",
-          en: "Revenue, profit and margin on one screen — the answer to an owner's most common question.",
+          id: "Pendapatan, laba, dan margin dalam satu layar, jawaban atas pertanyaan paling sering pemilik usaha.",
+          en: "Revenue, profit and margin on one screen: the answer to an owner's most common question.",
         },
       },
       {
@@ -374,12 +374,12 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       },
       {
         src: "/products/tile-akuntuntas-4.webp",
-        caption: { id: "Tampilan analisis pembukuan.", en: "The bookkeeping analysis view." },
+        caption: { id: "Daftar pelanggan dan pemasok.", en: "The customers and suppliers list." },
       },
     ],
     facts: [
       { label: { id: "Kategori", en: "Category" }, value: { id: "Alat bisnis", en: "Business tools" } },
-      { label: { id: "Platform", en: "Platform" }, value: { id: "Web", en: "Web" } },
+      { label: { id: "Platform", en: "Platform" }, value: { id: "Windows", en: "Windows" } },
       { label: { id: "Status", en: "Status" }, value: { id: "Internal", en: "Internal" } },
     ],
   },
@@ -390,8 +390,8 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       en: "An AI with a face, not just a text box.",
     },
     problem: {
-      id: "Asisten AI hari ini terasa seperti formulir. Kamu mengetik, membaca, menunggu. Tidak ada kehadiran, tidak ada rasa sedang berbicara dengan sesuatu — padahal yang dibutuhkan banyak orang justru rasa ditemani.",
-      en: "Today's AI assistants feel like a form. You type, read, wait. There is no presence, no sense of talking to something — yet what many people actually want is the feeling of company.",
+      id: "Asisten AI hari ini terasa seperti formulir. Kamu mengetik, membaca, menunggu. Tidak ada kehadiran, tidak ada rasa sedang berbicara dengan sesuatu, padahal yang dibutuhkan banyak orang justru rasa ditemani.",
+      en: "Today's AI assistants feel like a form. You type, read, wait. There is no presence, no sense of talking to something, yet what many people actually want is the feeling of company.",
     },
     vision: {
       id: "Amara mengeksplorasi bentuk lain dari AI: sesuatu yang hadir di desktop, punya avatar, dan bisa diajak bicara dengan suara. Ini eksperimen jangka panjang soal bagaimana komputer bisa terasa menemani tanpa berpura-pura jadi manusia.",
@@ -478,8 +478,8 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       {
         src: "/products/tile-lumawall.webp",
         caption: {
-          id: "LumaWall dengan galeri wallpaper dan kontrol monitor.",
-          en: "LumaWall with its wallpaper gallery and monitor controls.",
+          id: "Katalog wallpaper LumaWall dengan pemilihan monitor.",
+          en: "The LumaWall wallpaper catalog with monitor targeting.",
         },
       },
     ],
@@ -651,10 +651,6 @@ export const COPY = {
       id: "Logo Xinet",
       en: "Xinet logo",
     },
-    constellationLabel: {
-      id: "Crux — rasi bintang yang membentuk X",
-      en: "Crux — the constellation that forms an X",
-    },
   },
   ecosystem: {
     eyebrow: { id: "Ekosistem Kami", en: "Our Ecosystem" },
@@ -700,8 +696,8 @@ export const COPY = {
     eyebrow: { id: "Ekosistem Sekilas", en: "Ecosystem at a glance" },
     heading: { id: "Terukur, bukan klaim.", en: "Measured, not claimed." },
     body: {
-      id: "Angka di bawah hanya menghitung yang benar-benar sudah berjalan — produk yang dirilis, dan bidang yang kami kerjakan.",
-      en: "The numbers below count only what is actually running — products that shipped, and the areas we work in.",
+      id: "Angka di bawah hanya menghitung yang benar-benar sudah berjalan: produk yang dirilis, dan bidang yang kami kerjakan.",
+      en: "The numbers below count only what is actually running: products that shipped, and the areas we work in.",
     },
   },
   how: {

@@ -33,7 +33,7 @@ export async function generateMetadata({
   const detail = getProjectDetail(id);
   if (!product || !detail) return {};
 
-  const title = `${product.name} — ${detail.tagline.en}`;
+  const title = `${product.name} · ${detail.tagline.en}`;
   const description = `${detail.tagline.en} ${detail.problem.en}`.slice(0, 300);
   const url = `https://xinet.id/projects/${product.id}`;
 

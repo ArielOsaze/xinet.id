@@ -61,7 +61,7 @@ export function Navbar() {
         <ScrollLink
           href="#top"
           className="flex shrink-0 items-center rounded-md py-2"
-          ariaLabel="Xinet — beranda"
+          ariaLabel="Xinet · beranda"
         >
           <XinetLogo variant="wordmark" height={22} priority alt={t(COPY.hero.logoAlt)} />
         </ScrollLink>
