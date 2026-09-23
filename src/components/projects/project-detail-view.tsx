@@ -296,18 +296,18 @@ export function ProjectDetailView({
           Products with a single distinct capture (Amara, LumaWall) have no
           gallery: their hero already shows that one screen, so repeating it here
           would show the same image twice on one page. */}
-      {(
+      {/* Only when there are captures to show.
+          
+          This section used to render for every product, with the label swapped
+          for an invented line when there was no gallery. That produced two
+          sparse sections back to back on Amara and LumaWall — one line each,
+          ~300px apart — and the invented line was factually wrong for LumaWall,
+          whose headline feature is multi-monitor while the line claimed the
+          whole product fit on one screen. A gallery section should hold
+          captures; without captures there is nothing to put here. */}
+      {detail.gallery.length > 0 && (
         <section className="border-line border-t py-20 md:py-28">
           <div className="shell">
-            {/* This statement is the page's fourth animated text block, and it
-                exists on every product page.
-                
-                It used to render only alongside a gallery, which meant the two
-                products whose entire UI is one screen (Amara, LumaWall) animated
-                three text blocks while the other three animated four: the pages
-                visibly behaved differently. A second capture cannot be invented
-                for them, so the statement adapts instead and the motion stays
-                identical everywhere. */}
             <div className="mb-12">
               <ScrollReveal
                 as="p"
@@ -317,17 +317,12 @@ export function ProjectDetailView({
                 containerClassName="!my-0"
                 textClassName="!text-[clamp(1.25rem,2.4vw,1.75rem)] !leading-[1.3] !font-semibold !text-ink !tracking-[-0.02em]"
               >
-                {detail.gallery.length > 0
-                  ? lang === "id"
-                    ? "Tangkapan asli dari produk yang berjalan."
-                    : "Real captures of the running product."
-                  : lang === "id"
-                    ? "Satu layar, dan seluruh produknya ada di situ."
-                    : "One screen, and the whole product is in it."}
+                {lang === "id"
+                  ? "Tangkapan asli dari produk yang berjalan."
+                  : "Real captures of the running product."}
               </ScrollReveal>
             </div>
 
-            {detail.gallery.length > 0 && (
             <div className={cn("grid gap-6", detail.gallery.length > 1 && "lg:grid-cols-2")}>
               {detail.gallery.map((g, i) => (
                 <Reveal key={g.src} delay={i * 70}>
@@ -355,24 +350,30 @@ export function ProjectDetailView({
                 </Reveal>
               ))}
             </div>
-            )}
           </div>
         </section>
       )}
 
       {/* ---------- Closing statement ----------
           Every product page ends on this animated line, so all five pages carry
-          the same amount of motion. Without it, pages that happen to have a
-          gallery got an extra animated heading and the rest did not, which read
-          as an unfinished page. */}
-      <section className="border-line border-t py-20 md:py-28">
+          the same amount of motion.
+
+          Two things were making this eat more room than it needed:
+           - the section used the content sections' padding (py-20 md:py-28), so a
+             single line sat in a full section's worth of space and read as an
+             empty section. It now uses py-14 md:py-20;
+           - a max-w-3xl cap forced the line to break. Measured: the text needs
+             ~819px at this size and the shell is 1248px, so the cap was the only
+             reason it wrapped. It is gone, and the statement now runs on one
+             line wherever the viewport allows. */}
+      <section className="border-line border-t py-14 md:py-20">
         <div className="shell">
           <ScrollReveal
             baseOpacity={0.18}
             enableBlur
             blurStrength={4}
             containerClassName="!my-0"
-            textClassName="!text-[clamp(1.5rem,3.4vw,2.625rem)] !leading-[1.28] !font-semibold !text-ink !tracking-[-0.03em]"
+            textClassName="!text-[clamp(1.375rem,2.8vw,2.125rem)] !leading-[1.3] !font-semibold !text-ink !tracking-[-0.03em]"
           >
             {t(detail.closing)}
           </ScrollReveal>
