@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useLang } from "@/components/providers/language-provider";
 import { Reveal } from "@/components/ui/reveal";
 import { Cta, CtaArrow } from "@/components/ui/cta";
+import Link from "next/link";
 import { ScrollLink } from "@/components/ui/scroll-link";
 import { AppWindow } from "@/components/brand/app-window";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
@@ -384,10 +385,16 @@ export function ProjectDetailView({
       {nextProduct && nextDetail && (
         <section className="border-line border-t py-20 md:py-24">
           <div className="shell">
-            <ScrollLink
+            {/* A plain `Link`, not `ScrollLink`.
+                ScrollLink handles in-page fragments and decides that any target
+                it cannot find in the current document belongs to the home page,
+                so it navigated to "/" — clicking "Next project" went to the top
+                of the landing page instead of the next product. A cross-page
+                route is a normal navigation. */}
+            <Link
               href={`/projects/${nextProduct.id}`}
               className="group block"
-              ariaLabel={`${lang === "id" ? "Proyek berikutnya" : "Next project"}: ${nextProduct.name}`}
+              aria-label={`${lang === "id" ? "Proyek berikutnya" : "Next project"}: ${nextProduct.name}`}
             >
               <p className="eyebrow mb-6">
                 {lang === "id" ? "Proyek berikutnya" : "Next project"}
@@ -406,7 +413,7 @@ export function ProjectDetailView({
               <p className="text-ink-muted mt-3 max-w-xl text-[0.9375rem] leading-relaxed">
                 {t(nextDetail.tagline)}
               </p>
-            </ScrollLink>
+            </Link>
           </div>
         </section>
       )}

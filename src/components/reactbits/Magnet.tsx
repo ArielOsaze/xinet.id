@@ -9,6 +9,18 @@ interface MagnetProps extends HTMLAttributes<HTMLDivElement> {
   inactiveTransition?: string;
   wrapperClassName?: string;
   innerClassName?: string;
+  /**
+   * Display mode of the outer wrapper.
+   *
+   * This has to be a prop rather than something a caller sets with a class.
+   * The wrapper carries `display` in its INLINE STYLE, and an inline style beats
+   * any class, so passing `block` via `wrapperClassName` silently did nothing:
+   * the wrapper stayed `inline-block`, shrank to fit its own content, and every
+   * card came out a different width depending on how long its text happened to
+   * be. Measured in the capabilities grid: 318px for the card with the shortest
+   * description against 357.3px for the rest.
+   */
+  wrapperDisplay?: string;
 }
 
 const Magnet: React.FC<MagnetProps> = ({
@@ -20,6 +32,7 @@ const Magnet: React.FC<MagnetProps> = ({
   inactiveTransition = 'transform 0.5s ease-in-out',
   wrapperClassName = '',
   innerClassName = '',
+  wrapperDisplay = 'inline-block',
   ...props
 }) => {
   const [isActive, setIsActive] = useState<boolean>(false);
@@ -65,7 +78,7 @@ const Magnet: React.FC<MagnetProps> = ({
     <div
       ref={magnetRef}
       className={wrapperClassName}
-      style={{ position: 'relative', display: 'inline-block' }}
+      style={{ position: 'relative', display: wrapperDisplay }}
       {...props}
     >
       <div

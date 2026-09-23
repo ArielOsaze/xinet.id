@@ -42,7 +42,12 @@ export function WhatWeBuild() {
             <Magnet
               padding={60}
               magnetStrength={18}
-              wrapperClassName="block h-full"
+              // `block` has to go through the prop: the wrapper sets `display`
+              // inline, so a class here would lose. With `inline-block` the
+              // wrapper shrank to fit its own text and card 05 — the shortest
+              // description — rendered 318px wide against 357.3px for the rest.
+              wrapperDisplay="block"
+              wrapperClassName="h-full"
               innerClassName="h-full"
             >
               <BorderGlow
@@ -68,7 +73,18 @@ export function WhatWeBuild() {
                     {t(cap.title)}
                   </h3>
 
-                  <p className="text-ink-muted mt-2.5 max-w-xs text-sm leading-relaxed">
+                  {/* No `max-w-xs`: the cap was narrower than the card's own text
+                      column, so it forced the copy to wrap earlier than the card
+                      required and made line counts depend on the cap rather than
+                      on the words.
+
+                      `min-h` pins the block to two lines. Card 05's description is
+                      32 characters against 45-57 for the others, so it rendered
+                      one line where the rest rendered two — leaving 22.8px of
+                      extra space at its bottom and making that card look like a
+                      different size. Reserving two lines makes every card's
+                      content the same height whatever its copy length. */}
+                  <p className="text-ink-muted mt-2.5 min-h-[2.9rem] text-sm leading-relaxed">
                     {t(cap.description)}
                   </p>
                 </div>
