@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, forwardRef, type ReactNode } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { rememberScrollTarget } from "@/components/ui/pending-scroll";
 
 /**
  * ScrollLink — in-page navigation without the `#` in the address bar.
@@ -22,10 +24,19 @@ import { cn } from "@/lib/utils";
  * The scroll itself respects `prefers-reduced-motion`: smooth scrolling is
  * motion, so those users get an instant jump instead.
  *
+ * CROSS-PAGE TARGETS: the same navbar is rendered on /projects/<id>, but the
+ * sections it points at (`#products`, `#about`, ...) only exist on the landing
+ * page. A plain in-page lookup there returns null and the click does nothing at
+ * all — the links look broken. When the target is not on the current page, this
+ * navigates to the page that owns it and scrolls once it has rendered.
+ *
  * Extra props (ref, mouse handlers, aria attributes) pass straight through to
  * the anchor, because callers such as PillLinks attach GSAP refs and hover
  * handlers to it.
  */
+
+/** The landing page owns every in-page section the navbar links to. */
+const HOME = "/";
 
 type ScrollLinkProps = {
   /** Fragment href, e.g. "#products". */
@@ -42,6 +53,9 @@ export const ScrollLink = forwardRef<HTMLAnchorElement, ScrollLinkProps>(
     { href, children, className, ariaLabel, onNavigate, onClick, ...rest },
     ref
   ) {
+    const router = useRouter();
+    const pathname = usePathname();
+
     const handleClick = useCallback(
       (e: React.MouseEvent<HTMLAnchorElement>) => {
         // Give the caller first refusal (PillLinks and friends may need to act).
@@ -52,7 +66,32 @@ export const ScrollLink = forwardRef<HTMLAnchorElement, ScrollLinkProps>(
 
         const id = href.startsWith("#") ? href.slice(1) : href;
         const target = document.getElementById(id);
-        if (!target) return;
+
+        if (!target) {
+          // The section lives on another page (e.g. the navbar on a project
+          // page). Record where to land, go home, and let PendingScroll finish
+          // the jump — that keeps the URL free of a `#`, which is the whole
+          // point of this component.
+          e.preventDefault();
+          if (pathname !== HOME) {
+            rememberScrollTarget(id);
+            router.push(HOME);
+          } else {
+            // Already home but the section is missing (not yet mounted):
+            // retry once on the next frame rather than dropping the click.
+            requestAnimationFrame(() => {
+              const late = document.getElementById(id);
+              late?.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                  ? "auto"
+                  : "smooth",
+                block: "start",
+              });
+            });
+          }
+          onNavigate?.();
+          return;
+        }
 
         e.preventDefault();
 
@@ -68,7 +107,7 @@ export const ScrollLink = forwardRef<HTMLAnchorElement, ScrollLinkProps>(
 
         onNavigate?.();
       },
-      [href, onNavigate, onClick]
+      [href, onNavigate, onClick, pathname, router]
     );
 
     return (

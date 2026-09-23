@@ -227,6 +227,9 @@ export function ProjectDetailView({
                       // "560px" for a 92vw slot made Next request a 3840px
                       // variant, which is both slow and wasteful.
                       sizes="(max-width: 1024px) 92vw, 44vw"
+                      // 95, not the default 75 — Next re-encodes at the
+                      // requested quality, and 75 visibly softens UI text.
+                      quality={95}
                     />
                     <p className="text-ink-muted mt-4 text-[0.8125rem] leading-relaxed">
                       {t(g.caption)}

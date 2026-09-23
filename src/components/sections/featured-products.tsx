@@ -114,7 +114,11 @@ function ProductCardBody({ product, index }: { product: Product; index: number }
           alt={t(product.shotAlt)}
           title={product.shotTitle}
           className="relative w-full"
-          sizes="(max-width: 1024px) 92vw, 640px"
+          // The window occupies 7 of 12 columns inside the shell, so it paints
+          // around 40vw on a desktop. The old value claimed 640px, which made
+          // Next serve a 640px file for a ~530px slot — fine at 1x, but a 2x
+          // screen then upscales it and the UI text goes soft.
+          sizes="(max-width: 1024px) 92vw, 44vw"
         />
       </div>
 

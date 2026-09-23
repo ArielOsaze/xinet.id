@@ -333,26 +333,36 @@ export function TileReveal({
           </div>
         </div>
 
-        {/* Headline, held over the tiles. The scrim keeps the text legible
-            against tile labels at every viewport, especially on mobile.
-            It is deliberately wider and denser than a plain text shadow:
-            the tiles include near-white product screenshots, and thin white
-            type over a white UI panel is unreadable however bold the shadow. */}
+        {/* Headline, held over the tiles.
+            Legibility comes from a TIGHT text shadow that follows the glyphs,
+            plus a small, light scrim — not from a large dark box. An earlier
+            version used a wide, near-opaque scrim, which read as a black cloud
+            sitting on top of the product tiles and hid the very screenshots the
+            section is meant to show.
+            The scrim is now barely there and does the least work: the halo that
+            makes the type readable is attached to each glyph, so the darkening
+            follows the letters instead of blanketing a rectangle of tiles. */}
         {headline && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center px-6">
             <div className="relative isolate max-w-4xl">
               <div
                 aria-hidden="true"
-                className="absolute -inset-x-24 -inset-y-16 -z-10 rounded-[4rem]"
+                className="absolute -inset-x-4 -inset-y-3 -z-10 rounded-[3rem]"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, rgba(8,10,12,0.97) 0%, rgba(8,10,12,0.94) 34%, rgba(8,10,12,0.72) 58%, rgba(8,10,12,0) 82%)",
+                    "radial-gradient(ellipse at center, rgba(8,10,12,0.34) 0%, rgba(8,10,12,0.18) 52%, rgba(8,10,12,0) 80%)",
                 }}
               />
               <div
                 ref={headlineRef}
                 className="text-center text-[clamp(1.75rem,6vw,4.5rem)] leading-[1.06] font-semibold tracking-[-0.04em]"
-                style={{ textShadow: "0 2px 24px rgba(8,10,12,0.85)" }}
+                style={{
+                  // The readability work happens here: a tight dark edge around
+                  // every glyph. Because it tracks the letterforms, the tiles
+                  // between and around the words stay visible.
+                  textShadow:
+                    "0 0 2px rgba(8,10,12,1), 0 0 6px rgba(8,10,12,0.95), 0 1px 12px rgba(8,10,12,0.8), 0 2px 22px rgba(8,10,12,0.55)",
+                }}
               >
                 {headline}
               </div>

@@ -17,6 +17,7 @@ export function AppWindow({
   title,
   className,
   priority = false,
+  quality = 95,
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 780px",
 }: {
   src: string;
@@ -25,6 +26,8 @@ export function AppWindow({
   title: string;
   className?: string;
   priority?: boolean;
+  /** 95 by default: Next re-encodes at this value and 75 softens UI text. */
+  quality?: number;
   sizes?: string;
 }) {
   return (
@@ -57,6 +60,7 @@ export function AppWindow({
           alt={alt}
           fill
           sizes={sizes}
+          quality={quality}
           priority={priority}
           className="object-contain object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />

@@ -86,13 +86,28 @@ export function EcosystemReveal() {
 
 /**
  * A single tile: a real product capture.
- * `object-cover` is safe here because the tile ratio matches the image ratio, so
- * cover and contain give the same result — cover just avoids a sub-pixel gap.
+ *
+ * `sizes` must describe the slot the tile ACTUALLY occupies, because Next.js
+ * uses it to pick which variant to send. The grid is 860px wide capped by the
+ * viewport, split into 3 columns, and the reveal zooms it 1.5x — so a tile is
+ * rendered around 400 CSS px on a desktop, not 280. Saying 280px made Next
+ * serve a 279px image for a 401px slot, which is why the tiles looked
+ * pixelated: the browser was upscaling by ~1.4x on a 1x screen and ~2.9x on a
+ * 2x screen.
  */
 function TileShot({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="border-line relative h-full w-full overflow-hidden rounded-[inherit] border bg-[#0B0E11]">
-      <Image src={src} alt={alt} fill sizes="(max-width: 768px) 45vw, 280px" className="object-cover" />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 45vw, (max-width: 1200px) 30vw, 420px"
+        // 95, not the default 75: these are UI screenshots with small sharp
+        // text, and Next.js re-encodes at the requested quality.
+        quality={95}
+        className="object-cover"
+      />
     </div>
   );
 }

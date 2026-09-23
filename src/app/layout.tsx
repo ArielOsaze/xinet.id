@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { ScrollLink } from "@/components/ui/scroll-link";
+import { PendingScroll } from "@/components/ui/pending-scroll";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -220,6 +221,9 @@ export default function RootLayout({
           Lewati ke konten
         </ScrollLink>
         <LanguageProvider>{children}</LanguageProvider>
+        {/* Completes a cross-page section jump (e.g. "Products" clicked from a
+            project page) without writing a `#` into the URL. */}
+        <PendingScroll />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
