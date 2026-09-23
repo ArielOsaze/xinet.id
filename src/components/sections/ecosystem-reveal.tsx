@@ -23,29 +23,33 @@ import { TileReveal } from "@/components/reactbits/TileReveal";
  */
 
 /**
- * One capture per entry, ordered for the checkerboard (D/L) pattern:
- *   D L D
+ * Nine captures, ordered for the checkerboard (D/L) pattern:
  *   L D L
  *   D L D
  *   L D L
+ *
+ * Only SECONDARY captures belong here. The five featured cards further down
+ * this same page already show each product's main screen, and five of the old
+ * tiles were pixel-identical to those cards (measured difference 0.08-0.16,
+ * where genuinely different screens differ by 5 or more). A visitor scrolled
+ * past the same screenshot twice. Removing them leaves nine unique screens.
+ *
+ * The order maximises tonal contrast between neighbours (measured brightness in
+ * comments), so the grid still reads as one composed surface.
  */
 const SHOTS: { src: string; alt: string }[] = [
   // Row 1
-  { src: "/products/tile-saybot.webp", alt: "SayBot messaging workspace" },
-  { src: "/products/tile-akuntuntas.webp", alt: "AkunTuntas financial report" },
-  { src: "/products/tile-nexshop.webp", alt: "NexShop game top-up storefront" },
+  { src: "/products/tile-nexshop-berita.webp", alt: "NexShop news and articles" }, // 212 light
+  { src: "/products/tile-saybot-2.webp", alt: "SayBot delivery stages and unified inbox" }, // 12 dark
+  { src: "/products/tile-akuntuntas-2.webp", alt: "AkunTuntas general journal" }, // 205 light
   // Row 2
-  { src: "/products/tile-akuntuntas-2.webp", alt: "AkunTuntas general journal" },
-  { src: "/products/tile-saybot-2.webp", alt: "SayBot workflow section" },
-  { src: "/products/tile-nexshop-marketplace.webp", alt: "NexShop marketplace" },
+  { src: "/products/tile-saybot-3.webp", alt: "SayBot pricing plans" }, // 13 dark
+  { src: "/products/tile-nexshop-marketplace.webp", alt: "NexShop marketplace" }, // 247 light
+  { src: "/products/tile-saybot-4.webp", alt: "SayBot workspace sign-in" }, // 10 dark
   // Row 3
-  { src: "/products/tile-lumawall.webp", alt: "LumaWall wallpaper engine" },
-  { src: "/products/tile-akuntuntas-3.webp", alt: "AkunTuntas chart of accounts" },
-  { src: "/products/tile-saybot-3.webp", alt: "SayBot product features" },
-  // Row 4
-  { src: "/products/tile-amara.webp", alt: "Amara AI Assistant desktop companion" },
-  { src: "/products/tile-saybot-4.webp", alt: "SayBot workflow and pricing" },
-  { src: "/products/tile-nexshop-reseller.webp", alt: "NexShop reseller program" },
+  { src: "/products/tile-akuntuntas-4.webp", alt: "AkunTuntas customers and suppliers" }, // 206 light
+  { src: "/products/tile-nexshop-reseller.webp", alt: "NexShop reseller program" }, // 183 light
+  { src: "/products/tile-akuntuntas-3.webp", alt: "AkunTuntas chart of accounts" }, // 204 light
 ];
 
 export function EcosystemReveal() {

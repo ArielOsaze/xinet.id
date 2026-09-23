@@ -14,6 +14,9 @@ interface TiltedCardProps {
   rotateAmplitude?: number;
   showMobileWarning?: boolean;
   showTooltip?: boolean;
+  /** Lock the card to a ratio (e.g. 1.6). Pair with object-contain so the
+   *  capture fills the card exactly instead of being cropped or letterboxed. */
+  aspectRatio?: number;
   overlayContent?: React.ReactNode;
   displayOverlayContent?: boolean;
 }
@@ -36,6 +39,7 @@ export default function TiltedCard({
   rotateAmplitude = 14,
   showMobileWarning = true,
   showTooltip = true,
+  aspectRatio,
   overlayContent = null,
   displayOverlayContent = false
 }: TiltedCardProps) {
@@ -91,10 +95,13 @@ export default function TiltedCard({
   return (
     <figure
       ref={ref}
-      className="relative w-full h-full [perspective:800px] flex flex-col items-center justify-center"
+      className="relative w-full [perspective:800px] flex flex-col items-center justify-center"
       style={{
-        height: containerHeight,
-        width: containerWidth
+        // With aspectRatio the card is sized by its width, so the capture's own
+        // ratio is preserved and `contain` fills it with no bars and no crop.
+        height: aspectRatio ? "auto" : containerHeight,
+        width: containerWidth,
+        ...(aspectRatio ? { aspectRatio: String(aspectRatio) } : {})
       }}
       onMouseMove={handleMouse}
       onMouseEnter={handleMouseEnter}
@@ -110,7 +117,7 @@ export default function TiltedCard({
         className="relative [transform-style:preserve-3d]"
         style={{
           width: imageWidth,
-          height: imageHeight,
+          height: aspectRatio ? "100%" : imageHeight,
           rotateX,
           rotateY,
           scale
@@ -119,7 +126,10 @@ export default function TiltedCard({
         <motion.img
           src={imageSrc}
           alt={altText}
-          className="absolute top-0 left-0 object-cover rounded-[15px] will-change-transform [transform:translateZ(0)]"
+          /* object-contain, never cover: these are product screenshots, and
+             cover silently crops the product's own UI (it cut the first letter
+             off the NexShop hero headline). */
+          className="absolute top-0 left-0 object-contain rounded-[15px] will-change-transform [transform:translateZ(0)]"
           style={{
             width: imageWidth,
             height: imageHeight
@@ -127,7 +137,7 @@ export default function TiltedCard({
         />
 
         {displayOverlayContent && overlayContent && (
-          <motion.div className="absolute top-0 left-0 z-[2] will-change-transform [transform:translateZ(30px)]">
+          <motion.div className="absolute top-0 left-0 z-[2] h-full w-full will-change-transform [transform:translateZ(30px)]">
             {overlayContent}
           </motion.div>
         )}

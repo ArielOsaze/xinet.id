@@ -10,6 +10,8 @@ type StarBorderProps<T extends React.ElementType> = React.ComponentPropsWithoutR
   backgroundColor?: string;
   textColor?: string;
   borderColor?: string;
+  /** Drop the built-in box so children can be a filled control themselves. */
+  bare?: boolean;
 };
 
 const StarBorder = <T extends React.ElementType = 'button'>({
@@ -21,6 +23,7 @@ const StarBorder = <T extends React.ElementType = 'button'>({
   backgroundColor = '#000000',
   textColor = '#ffffff',
   borderColor = '#222222',
+  bare = false,
   children,
   ...rest
 }: StarBorderProps<T>) => {
@@ -49,9 +52,17 @@ const StarBorder = <T extends React.ElementType = 'button'>({
           animationDuration: speed
         }}
       ></div>
+      {/* `bare` keeps the animated edge light but drops the component's own
+          box (padding, background and border). Use it when the children already
+          render their own filled control: otherwise the page shows a black box
+          behind a white pill, which reads as a broken double border. */}
       <div
-        className="relative z-1 border text-center text-[16px] py-[16px] px-[26px] rounded-[20px]"
-        style={{ background: backgroundColor, color: textColor, borderColor }}
+        className={
+          bare
+            ? "relative z-1 rounded-full"
+            : "relative z-1 border text-center text-[16px] py-[16px] px-[26px] rounded-[20px]"
+        }
+        style={bare ? undefined : { background: backgroundColor, color: textColor, borderColor }}
       >
         {children}
       </div>

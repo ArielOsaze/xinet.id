@@ -99,6 +99,7 @@ export function ProjectDetailView({
                 {product.url ? (
                   <StarBorder
                     as="div"
+                    bare
                     color="#22c7e8"
                     speed="5s"
                     thickness={1}
@@ -130,6 +131,10 @@ export function ProjectDetailView({
                   containerWidth="100%"
                   imageHeight="100%"
                   imageWidth="100%"
+                  // Every capture is 1600x1000. Locking the card to that ratio
+                  // lets object-contain fill it exactly: no crop (which cut the
+                  // first letter off NexShop's headline) and no letterbox bars.
+                  aspectRatio={1.6}
                   rotateAmplitude={9}
                   scaleOnHover={1.04}
                   showMobileWarning={false}
