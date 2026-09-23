@@ -155,10 +155,11 @@ const STRUCTURED_DATA = {
           item: {
             "@type": "SoftwareApplication",
             name: "AkunTuntas",
-            applicationCategory: "FinanceApplication",
+            "applicationCategory": "FinanceApplication",
             description:
-              "Accounting, administration and operational software for small businesses.",
-            operatingSystem: "Web",
+              "Bookkeeping and tax software for Indonesian small businesses, computing PPh 21, corporate income tax and VAT offline.",
+            url: "https://akuntuntas.xinet.id",
+            operatingSystem: "Windows",
             publisher: { "@id": `${SITE_URL}/#organization` },
           },
         },

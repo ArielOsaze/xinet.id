@@ -14,6 +14,12 @@ export type Product = {
   cta: Bi;
   /** Live product URL, or null when the product has no public destination yet. */
   url: string | null;
+  /**
+   * Where the product actually runs, for schema.org `operatingSystem`.
+   * Explicit rather than inferred: two of the five are desktop applications, and
+   * deriving this from the category reported "Web" for all of them.
+   */
+  platform: string;
   /** Restrained per-product hue used only for the card artwork surface. */
   hue: string;
   /** Real product screenshot shown inside the macOS-style window frame. */
@@ -42,6 +48,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Kunjungi NexShop", en: "Visit NexShop" },
     url: "https://nexshop.cloud",
+    platform: "Web",
     hue: "34 199 232",
     shot: "/products/nexshop.webp",
     shotTitle: "nexshop.cloud",
@@ -60,6 +67,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Jelajahi SayBot", en: "Explore SayBot" },
     url: "https://saybot.nexshop.cloud",
+    platform: "Web",
     hue: "96 165 250",
     shot: "/products/saybot.webp",
     shotTitle: "saybot.nexshop.cloud",
@@ -73,11 +81,12 @@ export const PRODUCTS: Product[] = [
     name: "AkunTuntas",
     category: { id: "Alat Bisnis", en: "Business Tools" },
     description: {
-      id: "Perangkat lunak akuntansi dan pembukuan sederhana yang dibuat untuk bisnis modern.",
-      en: "Simple accounting and bookkeeping software built for modern businesses.",
+      id: "Aplikasi pembukuan dan perpajakan untuk UMKM dan PT di Indonesia. Menghitung PPh 21, PPh Badan, dan PPN, dengan seluruh data tersimpan di komputer sendiri.",
+      en: "Bookkeeping and tax software for Indonesian small businesses and PT entities. Computes PPh 21, corporate income tax and VAT, with all data kept on your own machine.",
     },
-    cta: { id: "Kenali AkunTuntas", en: "Discover AkunTuntas" },
-    url: null,
+    cta: { id: "Buka AkunTuntas", en: "Open AkunTuntas" },
+    url: "https://akuntuntas.xinet.id",
+    platform: "Windows",
     hue: "167 139 250",
     shot: "/products/akuntuntas.webp",
     shotTitle: "AkunTuntas · Laporan Keuangan",
@@ -96,6 +105,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Kenali Amara", en: "Discover Amara" },
     url: null,
+    platform: "Windows",
     hue: "196 181 253",
     shot: "/products/amara.webp",
     shotTitle: "Amara · AI Assistant",
@@ -114,6 +124,7 @@ export const PRODUCTS: Product[] = [
     },
     cta: { id: "Kenali LumaWall", en: "Discover LumaWall" },
     url: null,
+    platform: "Windows",
     hue: "125 211 252",
     shot: "/products/lumawall.webp",
     shotTitle: "LumaWall · Desktop Engine",
@@ -333,7 +344,7 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       id: "AkunTuntas dibangun supaya pemilik usaha bisa menutup buku sendiri, tanpa harus paham debit-kredit lebih dulu. Visinya sederhana: laporan keuangan yang bisa dipercaya, dihasilkan oleh orang yang menjalankan bisnisnya sendiri.",
       en: "AkunTuntas exists so owners can close their own books without first understanding debits and credits. The vision is simple: trustworthy financial reports, produced by the people actually running the business.",
     },
-    status: { id: "Dipakai internal", en: "In internal use" },
+    status: { id: "Tersedia untuk Windows", en: "Available for Windows" },
     features: [
       {
         title: { id: "Jurnal yang rapi", en: "Tidy journals" },
@@ -381,7 +392,7 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
     facts: [
       { label: { id: "Kategori", en: "Category" }, value: { id: "Alat bisnis", en: "Business tools" } },
       { label: { id: "Platform", en: "Platform" }, value: { id: "Windows", en: "Windows" } },
-      { label: { id: "Status", en: "Status" }, value: { id: "Internal", en: "Internal" } },
+      { label: { id: "Status", en: "Status" }, value: { id: "Publik", en: "Public" } },
     ],
     closing: {
       id: "Pembukuan yang biasanya menumpuk di akhir bulan, sekarang jalan tiap hari.",
@@ -607,7 +618,7 @@ export const LAB_ITEMS: {
 export const FOOTER_PRODUCTS: { name: string; url: string | null }[] = [
   { name: "NexShop", url: "https://nexshop.cloud" },
   { name: "SayBot", url: "https://saybot.nexshop.cloud" },
-  { name: "AkunTuntas", url: null },
+  { name: "AkunTuntas", url: "https://akuntuntas.xinet.id" },
 ];
 
 export const FOOTER_COMPANY: { id: string; label: Bi }[] = [

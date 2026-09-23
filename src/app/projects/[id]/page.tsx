@@ -111,7 +111,9 @@ function structuredData(id: string) {
         description: product.description.en,
         url,
         screenshot: `${SITE_URL}${product.shot}`,
-        operatingSystem: "Web",
+        // Real platform, not a guess: AkunTuntas and Amara ship as Windows
+        // desktop applications, so reporting "Web" for them was wrong.
+        operatingSystem: product.platform,
         inLanguage: ["id-ID", "en-US"],
         publisher: { "@id": `${SITE_URL}/#organization` },
         ...(product.url ? { sameAs: [product.url] } : {}),
