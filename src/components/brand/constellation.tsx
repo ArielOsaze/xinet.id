@@ -120,6 +120,17 @@ export function Constellation({ className }: { className?: string }) {
 
     const reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+    /**
+     * Reduced motion scales the animation down, it does not stop it.
+     *
+     * Freezing the field made the hero read as a broken canvas, and it also
+     * switched off the pointer parallax, so the layer felt dead rather than
+     * calm. Twinkle and drift run at 40% speed instead, and the pointer keeps
+     * working: a single eased parallax offset is not the kind of motion the
+     * setting exists to prevent.
+     */
+    const speedScale = () => (reduceMq.matches ? 0.4 : 1);
+
     let w = 0;
     let h = 0;
     let raf = 0;
@@ -128,7 +139,11 @@ export function Constellation({ className }: { className?: string }) {
     const started = performance.now();
 
     // Pointer parallax: eased toward the target each frame.
-    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    //   x / y   = the eased parallax offset applied to the field
+    //   tx / ty = its target
+    //   nx / ny = the pointer's position inside the canvas, normalised 0..1,
+    //             used to light up the stars nearest the cursor
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0, nx: 0.5, ny: 0.5 };
 
     let motes: Mote[] = [];
     let field: FieldStar[] = [];
@@ -193,8 +208,14 @@ export function Constellation({ className }: { className?: string }) {
     const clamp01 = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t);
 
     const draw = (now: number) => {
-      const time = (now - started) / 1000;
-      const still = reduceMq.matches;
+      // `time` is the animation clock; slowing it is how reduced motion is
+      // honoured, so every consumer below scales automatically.
+      //
+      // `still` is kept at false on purpose and is now only a compile-time
+      // constant for the branches below: freezing the canvas is exactly what
+      // made the hero look broken. Reduced motion slows the clock instead.
+      const time = ((now - started) / 1000) * speedScale();
+      const still = false;
 
       ctx.clearRect(0, 0, w, h);
 
@@ -318,8 +339,20 @@ export function Constellation({ className }: { className?: string }) {
       }
 
       // --- the five stars --------------------------------------------------
+      // Cursor proximity: the star nearest the pointer lights up and its halo
+      // swells, so moving the mouse across the hero reads as the constellation
+      // answering the visitor rather than as a looping GIF. Measured in canvas
+      // space (0..1) with a smooth falloff, so nothing snaps on or off.
+      const px = pointer.nx * w;
+      const py = pointer.ny * h;
+      const NEAR = Math.min(w, h) * 0.42;
+
       STARS.forEach((s, i) => {
         const final = project(s.x, s.y);
+
+        const distToPointer = Math.hypot(final.x - px, final.y - py);
+        const near = clamp01(1 - distToPointer / NEAR);
+        const heat = near * near * (3 - 2 * near); // smoothstep
 
         // Staggered fly-in from a scattered starting point.
         const p = still ? 1 : easeOut(clamp01((time - i * 0.16) / 1.6));
@@ -330,11 +363,13 @@ export function Constellation({ className }: { className?: string }) {
 
         const f = flux(s.mag);
         const coreRadius = 1.1 + f * 2.6;
-        const glowRadius = (9 + f * 34) * (0.55 + 0.45 * p);
+        // `heat` widens the halo and brightens the core without moving the
+        // star, so the layout stays exactly as designed.
+        const glowRadius = (9 + f * 34) * (0.55 + 0.45 * p) * (1 + heat * 0.55);
 
         // Shimmer: slow, shallow, each star on its own phase.
         const shimmer = still ? 1 : 0.82 + 0.18 * Math.sin(time * 0.9 + i * 1.7);
-        const a = p * shimmer;
+        const a = p * shimmer * (1 + heat * 0.5);
 
         // Outer halo, in the star's own scattered-light colour.
         const glow = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
@@ -399,7 +434,8 @@ export function Constellation({ className }: { className?: string }) {
         ctx.fill();
       });
 
-      if (!still && onScreen && tabVisible) {
+      // Always keep animating while visible: nothing is frozen any more.
+      if (onScreen && tabVisible) {
         raf = requestAnimationFrame(draw);
       }
     };
@@ -415,7 +451,7 @@ export function Constellation({ className }: { className?: string }) {
 
     const ro = new ResizeObserver(() => {
       resize();
-      if (reduceMq.matches) restart();
+      restart();
     });
     ro.observe(host);
 
@@ -445,6 +481,11 @@ export function Constellation({ className }: { className?: string }) {
       const dy = (e.clientY - (r.top + r.height / 2)) / r.height;
       pointer.tx = Math.max(-1, Math.min(1, dx)) * -12;
       pointer.ty = Math.max(-1, Math.min(1, dy)) * -12;
+      // Position inside the canvas, for the proximity highlight. Values outside
+      // 0..1 mean the cursor has left the field, which fades the effect out
+      // naturally because every distance becomes large.
+      pointer.nx = (e.clientX - r.left) / r.width;
+      pointer.ny = (e.clientY - r.top) / r.height;
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
 

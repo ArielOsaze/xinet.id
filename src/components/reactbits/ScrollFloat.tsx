@@ -14,6 +14,8 @@ interface ScrollFloatProps {
   scrollStart?: string;
   scrollEnd?: string;
   stagger?: number;
+  /** Element to render. Defaults to h2. */
+  as?: "h1" | "h2" | "h3" | "p" | "div";
 }
 
 const ScrollFloat: React.FC<ScrollFloatProps> = ({
@@ -25,9 +27,12 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
   ease = 'back.inOut(2)',
   scrollStart = 'center bottom+=50%',
   scrollEnd = 'bottom bottom-=40%',
-  stagger = 0.03
+  stagger = 0.03,
+  as: Tag = 'h2'
 }) => {
-  const containerRef = useRef<HTMLHeadingElement>(null);
+  // The tag is polymorphic, so the ref type is intentionally loose here.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const containerRef = useRef<any>(null);
 
   /**
    * Split into WORDS, not characters.
@@ -93,9 +98,9 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
   }, [scrollContainerRef, animationDuration, ease, scrollStart, scrollEnd, stagger]);
 
   return (
-    <h2 ref={containerRef} className={`my-5 overflow-hidden ${containerClassName}`}>
+    <Tag ref={containerRef} className={`my-5 overflow-hidden ${containerClassName}`}>
       <span className={`inline-block text-[clamp(1.6rem,4vw,3rem)] leading-[1.5] ${textClassName}`}>{splitText}</span>
-    </h2>
+    </Tag>
   );
 };
 

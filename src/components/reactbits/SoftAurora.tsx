@@ -17,6 +17,12 @@ interface SoftAuroraProps {
   enableMouseInteraction?: boolean;
   mouseInfluence?: number;
   lightMode?: boolean;
+  /**
+   * Pointer position normalised to the container, driven by the parent.
+   * Needed when the layer is `pointer-events-none`: the canvas then never
+   * receives a mousemove, so it cannot track the pointer itself.
+   */
+  mouse?: { x: number; y: number };
 }
 
 function hexToVec3(hex: string): [number, number, number] {
@@ -196,8 +202,13 @@ export default function SoftAurora({
   colorSpeed = 1.0,
   enableMouseInteraction = true,
   mouseInfluence = 0.25,
-  lightMode = false
+  lightMode = false,
+  mouse,
 }: SoftAuroraProps) {
+  // Latest external pointer, read by the render loop every frame. Kept in a
+  // ref so moving the cursor never re-creates the WebGL context.
+  const mouseRef = useRef<{ x: number; y: number } | undefined>(undefined);
+  mouseRef.current = mouse;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -273,6 +284,12 @@ export default function SoftAurora({
       program.uniforms.uTime.value = time * 0.001;
 
       if (enableMouseInteraction) {
+        // A parent-supplied pointer wins: on a `pointer-events-none` layer the
+        // canvas listener never fires, so targetMouse would stay pinned at 0.5
+        // and the shader would look dead to the cursor.
+        if (mouseRef.current) {
+          targetMouse = [mouseRef.current.x, 1 - mouseRef.current.y];
+        }
         currentMouse[0] += 0.05 * (targetMouse[0] - currentMouse[0]);
         currentMouse[1] += 0.05 * (targetMouse[1] - currentMouse[1]);
         program.uniforms.uMouse.value[0] = currentMouse[0];

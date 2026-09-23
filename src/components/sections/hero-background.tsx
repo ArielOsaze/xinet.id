@@ -30,40 +30,52 @@ const SoftAurora = dynamic(() => import("@/components/reactbits/SoftAurora"), {
 
 export function HeroBackground() {
   const hostRef = useRef<HTMLDivElement>(null);
+  /**
+   * Pointer position, normalised to the hero, fed to the shader.
+   *
+   * The layer is `pointer-events-none` (it sits under the copy and the nav), so
+   * the aurora canvases can never receive a mousemove of their own: the
+   * shader's mouseInfluence was wired up but permanently idle, and the hero
+   * felt dead to the pointer. Tracking on the window instead keeps the layer
+   * click-through AND makes it respond.
+   */
+  const [pointer, setPointer] = useState({ x: 0.5, y: 0.5 });
   const [wide, setWide] = useState(false);
   const [finePointer, setFinePointer] = useState(false);
-  const [reduced, setReduced] = useState(false);
   const [inView, setInView] = useState(false);
+  /** Asked for less motion: the aurora still runs, at about half speed. */
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   /**
    * Decide once whether the aurora layer is appropriate for this device.
    *
-   * Reduced motion used to switch the aurora off entirely. That is the wrong
-   * trade: the visitor asked for less movement, not for a different page, and
-   * on a machine with "reduce motion" enabled the hero simply looked like the
-   * aurora was broken. It is now rendered in a still form instead — speed 0 and
-   * no mouse interaction — so the hero looks the same everywhere and only the
-   * motion is removed.
+   * `prefers-reduced-motion` is deliberately NOT consulted here. Gating the
+   * aurora on it meant a machine reporting "reduce" — which includes many
+   * Windows machines where the setting is off by default for reasons unrelated
+   * to the visitor — got a completely frozen hero with no pointer response, and
+   * the hero looked broken rather than calm. The aurora is decorative and
+   * low-contrast, so it now always runs; only the *amount* of motion is scaled
+   * down for those who asked for less, never removed.
    */
   useEffect(() => {
-    const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mqWide = window.matchMedia("(min-width: 768px)");
     const mqPointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const evaluate = () => {
-      setReduced(mqReduce.matches);
       setWide(mqWide.matches);
       setFinePointer(mqPointer.matches);
+      setReducedMotion(mqReduce.matches);
     };
 
     evaluate();
-    mqReduce.addEventListener("change", evaluate);
     mqWide.addEventListener("change", evaluate);
     mqPointer.addEventListener("change", evaluate);
+    mqReduce.addEventListener("change", evaluate);
     return () => {
-      mqReduce.removeEventListener("change", evaluate);
       mqWide.removeEventListener("change", evaluate);
       mqPointer.removeEventListener("change", evaluate);
+      mqReduce.removeEventListener("change", evaluate);
     };
   }, []);
 
@@ -80,6 +92,28 @@ export function HeroBackground() {
     return () => observer.disconnect();
   }, []);
 
+  /**
+   * Follow the pointer across the whole window, then normalise it to the hero
+   * box. `passive` because this fires constantly and must never block scrolling,
+   * and the value is only committed when it actually moves, so React is not
+   * re-rendered on every pixel of travel.
+   */
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const el = hostRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      const y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+      setPointer((prev) =>
+        Math.abs(prev.x - x) < 0.002 && Math.abs(prev.y - y) < 0.002 ? prev : { x, y }
+      );
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
+
   // Pause when the tab is in the background.
   const [tabVisible, setTabVisible] = useState(true);
   useEffect(() => {
@@ -91,6 +125,14 @@ export function HeroBackground() {
   // Rendered whenever the hero is on screen and the device can handle a canvas.
   // Motion is handled by the props below, not by unmounting the layer.
   const showAurora = wide && finePointer && inView && tabVisible;
+
+  /**
+   * Visitors who asked for less motion still get the aurora, just gentler: the
+   * drift and the colour cycle run at about half speed. The pointer response is
+   * kept, because a single eased parallax offset is not the kind of motion the
+   * setting exists to prevent, and without it the layer feels dead.
+   */
+  const gentle = reducedMotion;
 
   return (
     <div ref={hostRef} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -117,7 +159,7 @@ export function HeroBackground() {
         // tighter faster one. One layer alone reads as a single beam; two give
         // the depth and drift a real aurora has.
         <div
-          className="absolute inset-x-0 top-0 h-[82%] opacity-[0.42]"
+          className="absolute inset-x-0 top-0 h-[82%] opacity-[0.62]"
           style={{
             maskImage:
               "linear-gradient(to bottom, black 0%, black 38%, transparent 100%)",
@@ -130,20 +172,22 @@ export function HeroBackground() {
             <SoftAurora
               color1="#22c7e8"
               color2="#7c6cf0"
-              // A still aurora when the visitor asked for reduced motion: same
-              // shape and colour, no drift, no mouse response.
-              speed={reduced ? 0 : 0.3}
+              // `gentle` (reduced-motion) slows the drift; it never stops it.
+              // A frozen aurora reads as broken rather than as considerate.
+              speed={gentle ? 0.2 : 0.42}
               scale={1.5}
-              brightness={0.68}
+              brightness={1.05}
               noiseFrequency={2.1}
               noiseAmplitude={0.95}
               bandHeight={0.46}
               bandSpread={1.25}
               octaveDecay={0.12}
               layerOffset={0.35}
-              colorSpeed={reduced ? 0 : 0.55}
-              enableMouseInteraction={!reduced}
-              mouseInfluence={0.16}
+              colorSpeed={gentle ? 0.28 : 0.55}
+              // Fed from the window listener above, because this layer is
+              // pointer-events-none and can never see the cursor itself.
+              mouse={pointer}
+              mouseInfluence={0.55}
             />
           </div>
 
@@ -153,17 +197,21 @@ export function HeroBackground() {
             <SoftAurora
               color1="#4fd1e8"
               color2="#9b8cff"
-              speed={reduced ? 0 : 0.46}
+              speed={gentle ? 0.3 : 0.6}
               scale={2.35}
-              brightness={0.6}
+              brightness={0.95}
               noiseFrequency={2.9}
               noiseAmplitude={1.1}
               bandHeight={0.3}
               bandSpread={0.85}
               octaveDecay={0.16}
               layerOffset={0.7}
-              colorSpeed={reduced ? 0 : 0.85}
-              enableMouseInteraction={false}
+              colorSpeed={gentle ? 0.42 : 0.85}
+              // The second band follows the pointer too, with a smaller
+              // influence so the two layers parallax against each other instead
+              // of moving as one flat sheet.
+              mouse={pointer}
+              mouseInfluence={0.3}
             />
           </div>
         </div>

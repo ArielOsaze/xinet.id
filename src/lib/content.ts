@@ -156,6 +156,14 @@ export type ProjectDetail = {
   status: Bi;
   /** Real captures, in order. Paths live under /public/products. */
   gallery: { src: string; caption: Bi }[];
+  /**
+   * A short closing statement, animated, that every project page ends on.
+   *
+   * This exists so all five pages carry the same amount of motion. Without it,
+   * the pages that happen to have a gallery got an extra animated heading and
+   * the others did not, which read as an unfinished page.
+   */
+  closing: Bi;
   /** Optional facts shown as a spec list. */
   facts?: { label: Bi; value: Bi }[];
 };
@@ -237,6 +245,10 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       { label: { id: "Platform", en: "Platform" }, value: { id: "Web", en: "Web" } },
       { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
     ],
+    closing: {
+      id: "Satu tempat untuk katalog, pembayaran, dan reseller. Semuanya jalan tanpa admin.",
+      en: "One place for catalog, payment and resellers. All of it runs without an admin.",
+    },
   },
   {
     id: "saybot",
@@ -302,6 +314,10 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       { label: { id: "Kanal", en: "Channels" }, value: { id: "4 kanal", en: "4 channels" } },
       { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
     ],
+    closing: {
+      id: "Percakapan yang dulu hilang di antara notifikasi sekarang punya satu rumah.",
+      en: "Conversations that used to get lost between notifications now have one home.",
+    },
   },
   {
     id: "akuntuntas",
@@ -367,6 +383,10 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       { label: { id: "Platform", en: "Platform" }, value: { id: "Windows", en: "Windows" } },
       { label: { id: "Status", en: "Status" }, value: { id: "Internal", en: "Internal" } },
     ],
+    closing: {
+      id: "Pembukuan yang biasanya menumpuk di akhir bulan, sekarang jalan tiap hari.",
+      en: "Bookkeeping that used to pile up at month end now happens every day.",
+    },
   },
   {
     id: "amara",
@@ -413,6 +433,10 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       { label: { id: "Platform", en: "Platform" }, value: { id: "Windows", en: "Windows" } },
       { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
     ],
+    closing: {
+      id: "Bukan asisten yang menunggu dipanggil, tapi yang sudah ada di layar kerjamu.",
+      en: "Not an assistant that waits to be summoned, but one already on your desktop.",
+    },
   },
   {
     id: "lumawall",
@@ -459,6 +483,10 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       { label: { id: "Platform", en: "Platform" }, value: { id: "Windows", en: "Windows" } },
       { label: { id: "Status", en: "Status" }, value: { id: "Rilis", en: "Shipped" } },
     ],
+    closing: {
+      id: "Dua layar, seharian menyala, dan tidak ada yang terasa berat.",
+      en: "Two screens, on all day, and nothing that feels heavy.",
+    },
   },
 ];
 

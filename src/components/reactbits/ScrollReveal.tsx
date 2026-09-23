@@ -40,6 +40,12 @@ type ScrollRevealProps = {
   blurStrength?: number;
   containerClassName?: string;
   textClassName?: string;
+  /**
+   * Element to render. Defaults to h2. Pass "p" when the reveal is supporting
+   * copy rather than a section heading, so it does not appear in the document
+   * outline (and does not count as a heading on the page).
+   */
+  as?: "h1" | "h2" | "h3" | "p" | "div";
 };
 
 export function ScrollReveal({
@@ -49,8 +55,11 @@ export function ScrollReveal({
   blurStrength = 5,
   containerClassName = "",
   textClassName = "",
+  as: Tag = "h2",
 }: ScrollRevealProps) {
-  const ref = useRef<HTMLHeadingElement>(null);
+  // The tag is polymorphic, so the ref type is intentionally loose here.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ref = useRef<any>(null);
   const [armed, setArmed] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
@@ -64,10 +73,26 @@ export function ScrollReveal({
     }));
   }, [children]);
 
-  // Arm the dimmed state before paint so there is no visible flash.
+  /**
+   * Arm the dimmed state before paint so there is no visible flash.
+   *
+   * This used to bail out entirely under `prefers-reduced-motion`, which meant
+   * the words were never dimmed and the paragraph appeared with NO animation —
+   * while other headings on the same page (ScrollFloat, which has no such
+   * guard) still animated. The result was a page where some text moved and some
+   * did not, which reads as a bug.
+   *
+   * Reduced motion now only softens the reveal: less travel, no blur. The
+   * animation always runs, so every heading on the page behaves the same.
+   */
   useIsomorphicLayoutEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     setArmed(true);
+  }, []);
+
+  /** Asked for less motion: same reveal, shorter travel, no blur. */
+  const [gentle, setGentle] = useState(false);
+  useIsomorphicLayoutEffect(() => {
+    setGentle(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
   const reveal = useCallback(() => setRevealed(true), []);
@@ -96,7 +121,7 @@ export function ScrollReveal({
   const dimmed = armed && !revealed;
 
   return (
-    <h2 ref={ref} className={cn("my-5", containerClassName)}>
+    <Tag ref={ref} className={cn("my-5", containerClassName)}>
       <span
         className={cn(
           "block text-[clamp(1.6rem,4vw,3rem)] leading-[1.5] font-semibold",
@@ -112,9 +137,13 @@ export function ScrollReveal({
               className="inline-block"
               style={{
                 opacity: dimmed ? baseOpacity : 1,
+                // `gentle` keeps the reveal but removes the blur and shortens
+                // the travel, so reduced motion softens it instead of skipping it.
                 filter:
-                  dimmed && enableBlur ? `blur(${blurStrength}px)` : "blur(0px)",
-                transform: dimmed ? "translateY(0.12em)" : "translateY(0)",
+                  dimmed && enableBlur && !gentle ? `blur(${blurStrength}px)` : "blur(0px)",
+                transform: dimmed
+                  ? `translateY(${gentle ? "0.04em" : "0.12em"})`
+                  : "translateY(0)",
                 transition:
                   "opacity 700ms cubic-bezier(0.16,1,0.3,1), filter 700ms cubic-bezier(0.16,1,0.3,1), transform 700ms cubic-bezier(0.16,1,0.3,1)",
                 transitionDelay: revealed ? `${word.key * 22}ms` : "0ms",
@@ -126,7 +155,7 @@ export function ScrollReveal({
           )
         )}
       </span>
-    </h2>
+    </Tag>
   );
 }
 
