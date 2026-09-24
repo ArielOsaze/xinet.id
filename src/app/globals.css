@@ -74,7 +74,19 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
+    /* No `scroll-behavior: smooth` here on purpose.
+     *
+     * It was a global default that nothing used: every scroll this site performs
+     * already names its own behaviour, via
+     * `scrollIntoView({ behavior: reduce ? "auto" : "smooth" })` in ScrollLink
+     * and PendingScroll. So the only scrolls the rule affected were ones nobody
+     * wrote — including the one the router performs when a client-side
+     * navigation resets the scroll position. Measured: opening a product while
+     * scrolled to 5200 animated that reset back to 0 over about 2.6 seconds,
+     * which reads as the new page scrolling from bottom to top.
+     *
+     * Removing it makes the reset instant while leaving every deliberate smooth
+     * scroll intact, because those ask for smoothness explicitly. */
     scroll-padding-top: calc(var(--x-nav-h) + 1rem);
   }
 

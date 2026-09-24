@@ -324,7 +324,12 @@ export function ProjectDetailView({
               </ScrollReveal>
             </div>
 
-            <div className={cn("grid gap-6", detail.gallery.length > 1 && "lg:grid-cols-2")}>
+            <div
+              className={cn(
+                "grid gap-6",
+                detail.gallery.length > 1 ? "lg:grid-cols-2" : "mx-auto max-w-3xl"
+              )}
+            >
               {detail.gallery.map((g, i) => (
                 <Reveal key={g.src} delay={i * 70}>
                   <SpotlightCard
@@ -336,10 +341,24 @@ export function ProjectDetailView({
                       alt={t(g.caption)}
                       title={product.shotTitle}
                       className="relative w-full"
-                      // Half the shell on desktop, full width on mobile. Saying
-                      // "560px" for a 92vw slot made Next request a 3840px
-                      // variant, which is both slow and wasteful.
-                      sizes="(max-width: 1024px) 92vw, 44vw"
+                      // Must match the real layout. The grid is only 2 columns
+                      // when there is more than one capture, so a lone capture
+                      // spans the full shell: measured 1104px wide against the
+                      // 634px that "44vw" claims. Describing it as 44vw made the
+                      // browser pick a candidate sized for the smaller box, and
+                      // the result was then upscaled to fit — visible as blur.
+                      //
+                      // Stated in px for the desktop case rather than vw, because
+                      // the shell is capped, so a wide viewport does not make the
+                      // card any wider than the cap.
+                      // The shell caps at 78rem (1248px) with an 80px gutter each
+                      // side, so content is 1088px, and the card's own padding
+                      // takes 20px twice -> the image paints 1044px wide.
+                      sizes={
+                        detail.gallery.length > 1
+                          ? "(max-width: 1024px) 92vw, (max-width: 1280px) 45vw, 502px"
+                          : "(max-width: 1024px) 92vw, 728px"
+                      }
                       // 95, not the default 75 — Next re-encodes at the
                       // requested quality, and 75 visibly softens UI text.
                       quality={95}
