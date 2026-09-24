@@ -51,7 +51,7 @@ export function FinalCta() {
           </p>
 
           <div className="mt-11 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Cta href="mailto:hello@xinet.id" variant="primary">
+            <Cta href="mailto:contactxinet@yahoo.com" variant="primary">
               {t(COPY.finalCta.primary)}
               <CtaArrow />
             </Cta>

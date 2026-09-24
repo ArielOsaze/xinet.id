@@ -96,6 +96,13 @@ const STRUCTURED_DATA = {
       url: SITE_URL,
       description: DESCRIPTION,
       slogan: "Build what's next.",
+      email: "contactxinet@yahoo.com",
+      contactPoint: {
+        "@type": "ContactPoint",
+        email: "contactxinet@yahoo.com",
+        contactType: "customer support",
+        availableLanguage: ["id", "en"],
+      },
       logo: {
         "@type": "ImageObject",
         url: `${SITE_URL}/brand/xinet-wordmark.png`,
