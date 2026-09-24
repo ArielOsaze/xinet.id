@@ -62,11 +62,23 @@ export function Cta({
     );
   }
 
-  if (href) {
+  // An in-page fragment is the only thing ScrollLink can act on. `mailto:`,
+  // `tel:` and real routes must be ordinary anchors: ScrollLink would try to
+  // find an element whose id is the whole string, fail, and preventDefault()
+  // the click, which is why a mailto CTA did nothing at all.
+  if (href && href.startsWith("#")) {
     return (
       <ScrollLink href={href} className={classes} ariaLabel={ariaLabel}>
         {children}
       </ScrollLink>
+    );
+  }
+
+  if (href) {
+    return (
+      <a href={href} className={classes} aria-label={ariaLabel}>
+        {children}
+      </a>
     );
   }
 

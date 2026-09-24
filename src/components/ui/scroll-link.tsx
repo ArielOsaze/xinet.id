@@ -64,7 +64,15 @@ export const ScrollLink = forwardRef<HTMLAnchorElement, ScrollLinkProps>(
         // Let the browser handle modified clicks normally.
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
 
-        const id = href.startsWith("#") ? href.slice(1) : href;
+        // Anything that is not an in-page fragment is none of this component's
+        // business: `mailto:`, `tel:`, an external URL, or a route like
+        // `/projects/<id>`. Handling those here is actively harmful — the lookup
+        // below finds nothing, and the preventDefault() that follows swallows the
+        // click, so the mail client never opens and a real route never navigates.
+        // The browser gets these untouched.
+        if (!href.startsWith("#")) return;
+
+        const id = href.slice(1);
         const target = document.getElementById(id);
 
         if (!target) {
