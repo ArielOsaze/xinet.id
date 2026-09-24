@@ -36,6 +36,9 @@ type CtaProps = {
   href?: string;
   external?: boolean;
   ariaLabel?: string;
+  /** For a Cta that acts instead of navigating (e.g. opening a menu). */
+  onClick?: () => void;
+  ariaExpanded?: boolean;
 };
 
 export function Cta({
@@ -45,6 +48,8 @@ export function Cta({
   href,
   external,
   ariaLabel,
+  onClick,
+  ariaExpanded,
 }: CtaProps) {
   const classes = cn(base, variants[variant], className);
 
@@ -79,6 +84,20 @@ export function Cta({
       <a href={href} className={classes} aria-label={ariaLabel}>
         {children}
       </a>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={classes}
+        aria-label={ariaLabel}
+        aria-expanded={ariaExpanded}
+      >
+        {children}
+      </button>
     );
   }
 

@@ -3,7 +3,8 @@
 import { useLang } from "@/components/providers/language-provider";
 import { COPY } from "@/lib/content";
 import { Reveal } from "@/components/ui/reveal";
-import { Cta, CtaArrow } from "@/components/ui/cta";
+import { Cta } from "@/components/ui/cta";
+import { ContactCta } from "@/components/sections/contact-cta";
 import GradualBlur from "@/components/reactbits/GradualBlur";
 
 /**
@@ -51,10 +52,11 @@ export function FinalCta() {
           </p>
 
           <div className="mt-11 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Cta href="mailto:contactxinet@yahoo.com" variant="primary">
-              {t(COPY.finalCta.primary)}
-              <CtaArrow />
-            </Cta>
+            {/* ContactCta, not a bare mailto: a mailto only works when the
+                visitor has a default mail app, and on a machine without one the
+                browser opens an empty tab instead. This offers Gmail on the web
+                and a copy button, so it works regardless of local setup. */}
+            <ContactCta />
             <Cta href="#products" variant="secondary">
               {t(COPY.finalCta.secondary)}
             </Cta>
