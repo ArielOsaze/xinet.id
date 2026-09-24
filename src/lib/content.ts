@@ -638,7 +638,7 @@ export const FOOTER_COMPANY: { id: string; label: Bi }[] = [
 ];
 
 export const SOCIALS: { name: string; href: string; label: string }[] = [
-  { name: "LinkedIn", href: "https://www.linkedin.com/company/xinet", label: "LinkedIn" },
+  { name: "LinkedIn", href: "https://www.linkedin.com/in/ariel-osaze-koinda-budi-991b5a284", label: "LinkedIn" },
   { name: "GitHub", href: "https://github.com/xinet", label: "GitHub" },
   { name: "Instagram", href: "https://www.instagram.com/xinet.id", label: "Instagram" },
 ];
