@@ -44,8 +44,8 @@ const SHOTS: { src: string; alt: string }[] = [
   { src: "/products/tile-akuntuntas-2.webp", alt: "AkunTuntas general journal" }, // 205 light
   // Row 2
   { src: "/products/tile-saybot-3.webp", alt: "SayBot pricing plans" }, // 13 dark
-  { src: "/products/tile-nexshop-marketplace.webp", alt: "NexShop marketplace" }, // 247 light
-  { src: "/products/tile-saybot-4.webp", alt: "SayBot workspace sign-in" }, // 10 dark
+  { src: "/products/tile-nexshop-marketplace.webp", alt: "NexShop marketplace catalog" }, // 247 light
+  { src: "/products/tile-saybot-4.webp", alt: "SayBot closing call to action" }, // 10 dark
   // Row 3
   { src: "/products/tile-akuntuntas-4.webp", alt: "AkunTuntas customers and suppliers" }, // 206 light
   { src: "/products/tile-nexshop-reseller.webp", alt: "NexShop reseller program" }, // 183 light

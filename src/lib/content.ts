@@ -223,8 +223,8 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       {
         title: { id: "Marketplace", en: "A marketplace" },
         body: {
-          id: "Ruang untuk penjual lain menaruh produknya, memperluas pilihan tanpa Xinet harus menambah stok sendiri.",
-          en: "Space for other sellers to list their products, widening the catalog without Xinet having to stock everything itself.",
+          id: "Katalog penyedia yang dihimpun NexShop, jadi pembeli menemukan lebih banyak layanan di satu tempat.",
+          en: "A catalog of providers aggregated by NexShop, so buyers find more services in one place.",
         },
       },
     ],
@@ -232,8 +232,8 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       {
         src: "/products/tile-nexshop-marketplace.webp",
         caption: {
-          id: "Marketplace tempat penjual lain menaruh produk.",
-          en: "The marketplace where other sellers list products.",
+          id: "Halaman marketplace dengan katalog layanan NexShop.",
+          en: "The marketplace page with NexShop's own service catalog.",
         },
       },
       {
@@ -317,7 +317,10 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       },
       {
         src: "/products/tile-saybot-4.webp",
-        caption: { id: "Halaman masuk ke ruang kerja.", en: "The workspace sign-in page." },
+        caption: {
+          id: "Ajakan masuk ke ruang kerja dan bagian penutup halaman.",
+          en: "The call to enter the workspace and the closing section.",
+        },
       },
     ],
     facts: [
@@ -488,6 +491,13 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
       },
     ],
     gallery: [
+      {
+        src: "/products/tile-lumawall-overview.webp",
+        caption: {
+          id: "Ringkasan: status tiap monitor dan wallpaper yang sedang aktif.",
+          en: "Overview: the state of each monitor and the wallpaper currently active.",
+        },
+      },
     ],
     facts: [
       { label: { id: "Kategori", en: "Category" }, value: { id: "Alat desktop", en: "Desktop tools" } },
