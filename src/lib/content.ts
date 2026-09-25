@@ -492,10 +492,31 @@ export const PROJECT_DETAILS: ProjectDetail[] = [
     ],
     gallery: [
       {
-        src: "/products/tile-lumawall-overview.webp",
+        src: "/products/tile-lumawall-catalog.webp",
         caption: {
-          id: "Ringkasan: status tiap monitor dan wallpaper yang sedang aktif.",
-          en: "Overview: the state of each monitor and the wallpaper currently active.",
+          id: "Katalog: filter per kategori dan panel detail wallpaper.",
+          en: "The catalog: per-category filters and the wallpaper detail panel.",
+        },
+      },
+      {
+        src: "/products/tile-lumawall-library.webp",
+        caption: {
+          id: "Koleksi sendiri: wallpaper yang sudah diunduh, siap diterapkan.",
+          en: "Your own library: downloaded wallpapers, ready to apply.",
+        },
+      },
+      {
+        src: "/products/tile-lumawall-displays.webp",
+        caption: {
+          id: "Monitor: satu wallpaper berbeda untuk tiap layar.",
+          en: "Displays: a different wallpaper assigned to each screen.",
+        },
+      },
+      {
+        src: "/products/tile-lumawall-performance.webp",
+        caption: {
+          id: "Performa: batas FPS, telemetri GPU, dan jeda otomatis.",
+          en: "Performance: the frame-rate limit, GPU telemetry and automatic pause.",
         },
       },
     ],
