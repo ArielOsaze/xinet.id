@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { frameRatio } from "@/lib/image-ratios";
 
 /**
  * AppWindow — a macOS-style window frame for real product screenshots.
@@ -10,6 +11,23 @@ import { cn } from "@/lib/utils";
  * each product card shows an actual capture of the running product rather than a
  * drawn illustration. The frame is Xinet's; the content is the product's own UI,
  * which is why each card keeps the product's real colours.
+ *
+ * ── WHY THE FRAME TAKES THE CAPTURE'S OWN RATIO ─────────────────────────────────
+ *
+ * The frame used to be a hard-coded 16:10 for every capture. Four products happen
+ * to be 16:10, so nothing showed; LumaWall's screens are 1.89 to 2.69, so inside
+ * a 16:10 box `object-contain` left 15-40% of the card as empty bars. On the
+ * widest one (`Displays`, 2.69) that was 121 of 300px — the card read as a
+ * screenshot that had failed to load or been cut off.
+ *
+ * Cropping those captures to 16:10 was tried and rejected: it removes 40% of that
+ * screen's width, taking the whole sidebar and the window controls with it, so the
+ * app looked broken rather than fixed.
+ *
+ * The ratio comes from `image-ratios.ts`, generated from the real files at build
+ * time, so the frame is right on the first paint and nothing shifts when the image
+ * arrives. Measuring in the browser was tried and dropped for exactly that reason:
+ * it corrects the frame only after load, i.e. it trades empty bars for layout shift.
  */
 export function AppWindow({
   src,
@@ -19,6 +37,7 @@ export function AppWindow({
   priority = false,
   quality = 95,
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 780px",
+  aspectRatio,
 }: {
   src: string;
   alt: string;
@@ -29,6 +48,12 @@ export function AppWindow({
   /** 95 by default: Next re-encodes at this value and 75 softens UI text. */
   quality?: number;
   sizes?: string;
+  /**
+   * Force the frame's shape. Omit to adopt the capture's own ratio, which is what
+   * avoids empty bars: a wide screenshot in a 16:10 box letterboxes, and cropping
+   * it instead would cut the app's own chrome off.
+   */
+  aspectRatio?: number;
 }) {
   return (
     <div
@@ -54,7 +79,10 @@ export function AppWindow({
       {/* Real product capture. `object-contain` keeps the whole screenshot
           visible: cropping a product UI cuts off the very parts that show what
           it does. The frame supplies the background so letterboxing is invisible. */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0B0E11]">
+      <div
+        className="relative w-full overflow-hidden bg-[#0B0E11]"
+        style={{ aspectRatio: String(aspectRatio ?? frameRatio(src)) }}
+      >
         <Image
           src={src}
           alt={alt}

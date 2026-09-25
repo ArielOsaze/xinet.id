@@ -16,6 +16,7 @@ import TiltedCard from "@/components/reactbits/TiltedCard";
 import CountUp from "@/components/reactbits/CountUp";
 import StarBorder from "@/components/reactbits/StarBorder";
 import type { Product, ProjectDetail } from "@/lib/content";
+import { frameRatio } from "@/lib/image-ratios";
 import { cn } from "@/lib/utils";
 
 /**
@@ -132,10 +133,12 @@ export function ProjectDetailView({
                   containerWidth="100%"
                   imageHeight="100%"
                   imageWidth="100%"
-                  // Every capture is 1600x1000. Locking the card to that ratio
-                  // lets object-contain fill it exactly: no crop (which cut the
-                  // first letter off NexShop's headline) and no letterbox bars.
-                  aspectRatio={1.6}
+                  // The capture's own ratio, so object-contain fills the card
+                  // exactly: no crop (which cut the first letter off NexShop's
+                  // headline) and no letterbox bars. Four products are 16:10, but
+                  // LumaWall's are 1.89-2.69, and hard-coding 1.6 left 15% of that
+                  // hero as empty bars above and below the screenshot.
+                  aspectRatio={frameRatio(product.shot)}
                   rotateAmplitude={9}
                   scaleOnHover={1.04}
                   showMobileWarning={false}
