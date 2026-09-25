@@ -192,6 +192,7 @@ const STRUCTURED_DATA = {
             applicationCategory: "UtilitiesApplication",
             description:
               "A Windows live wallpaper application with a multi-monitor catalog.",
+            url: "https://lumawall.xinet.id",
             operatingSystem: "Windows",
             publisher: { "@id": `${SITE_URL}/#organization` },
           },

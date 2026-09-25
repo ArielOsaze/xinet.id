@@ -122,8 +122,8 @@ export const PRODUCTS: Product[] = [
       id: "Mesin wallpaper hidup untuk Windows dengan katalog multi-monitor.",
       en: "A live wallpaper engine for Windows with a multi-monitor catalog.",
     },
-    cta: { id: "Kenali LumaWall", en: "Discover LumaWall" },
-    url: null,
+    cta: { id: "Buka LumaWall", en: "Open LumaWall" },
+    url: "https://lumawall.xinet.id",
     platform: "Windows",
     hue: "125 211 252",
     shot: "/products/lumawall.webp",
@@ -629,6 +629,7 @@ export const FOOTER_PRODUCTS: { name: string; url: string | null }[] = [
   { name: "NexShop", url: "https://nexshop.cloud" },
   { name: "SayBot", url: "https://saybot.nexshop.cloud" },
   { name: "AkunTuntas", url: "https://akuntuntas.xinet.id" },
+  { name: "LumaWall", url: "https://lumawall.xinet.id" },
 ];
 
 export const FOOTER_COMPANY: { id: string; label: Bi }[] = [
