@@ -39,9 +39,16 @@ import { TileReveal } from "@/components/reactbits/TileReveal";
  * widest gap in the set).
  *
  * AkunTuntas supplies four screens, so they sit at the corners: no two corners are
- * edge-adjacent in a 3x3 grid, so its three similar table views are never neighbours.
+ * edge-adjacent in a 3x3 grid, so its similar table views are never neighbours.
  * The worst edge-adjacent pair in this arrangement measures 25.6, where anything
  * under 12 would read as a duplicate.
+ *
+ * Two of its four tiles are the Dashboard and the Financial analysis, taken from
+ * the design set rather than from an empty company. Captures of an unseeded company
+ * render "Rp -" and draw no chart at all, so those screens showed empty axes and
+ * said nothing about what the product does. The design set is the same UI (measured
+ * 2.1 apart on a normalised comparison) captured with real figures, so the donut,
+ * the monthly bars and the health gauge actually appear.
  *
  * Only SECONDARY captures belong here. The five featured cards further down
  * this same page already show each product's main screen, and five of the old
@@ -62,7 +69,7 @@ import { TileReveal } from "@/components/reactbits/TileReveal";
  */
 const SHOTS: { src: string; alt: string }[] = [
   // Row 1
-  { src: "/products/mosaic-akun-ledger.webp", alt: "AkunTuntas general ledger with posted transactions" }, // 206 light
+  { src: "/products/mosaic-akun-ledger.webp", alt: "AkunTuntas dashboard: cash-flow donut, monthly bars and the key totals" }, // 198 light
   { src: "/products/mosaic-lumawall-catalog.webp", alt: "LumaWall catalog: category filters and the wallpaper detail panel" }, // 55 dark
   { src: "/products/mosaic-akun-coa.webp", alt: "AkunTuntas chart of accounts with the full account tree" }, // 205 light
   // Row 2
@@ -72,7 +79,7 @@ const SHOTS: { src: string; alt: string }[] = [
   // Row 3
   { src: "/products/mosaic-akun-partners.webp", alt: "AkunTuntas business partners with contact records" }, // 207 light
   { src: "/products/mosaic-saybot-inbox.webp", alt: "SayBot unified inbox: every channel and contact in one workspace" }, // 13 dark
-  { src: "/products/mosaic-akun-dashboard.webp", alt: "AkunTuntas dashboard: financial health and period summaries" }, // 209 light
+  { src: "/products/mosaic-akun-dashboard.webp", alt: "AkunTuntas financial analysis: the health score gauge and its insights" }, // 203 light
 ];
 
 export function EcosystemReveal() {

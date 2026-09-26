@@ -63,6 +63,14 @@ OUT_H = int(round(OUT_W / TILE_ASPECT))
 # by scripts/build-lumawall-captures.py.
 LW = S / "luma-clean"
 
+# AkunTuntas' chart screens come from the design set on the Desktop. They are the
+# same application UI as the shipped captures (measured 2.1 apart on a normalised
+# comparison, where the same screen scores under 3), but they were taken with real
+# figures, so the donut, bar chart and health gauge actually render. Captures taken
+# from an empty company show "Rp -" and draw nothing, which says nothing about what
+# the product does.
+AK = Path(r"C:\Users\ariel\Desktop\Hasil-Redesign-AkunTuntas")
+
 # (output name, source, product, expected tone, what the screen shows)
 #
 # LAYOUT: a dark MIDDLE COLUMN rather than a full checkerboard.
@@ -82,8 +90,8 @@ LW = S / "luma-clean"
 # side. Worst edge-adjacent similarity across the grid is 25.6, where anything under
 # 12 would read as a duplicate.
 TILES = [
-    ("mosaic-akun-ledger.webp", S / "raw" / "akuntuntas-2.png",
-     "AkunTuntas", "light", "General ledger with posted transactions"),
+    ("mosaic-akun-ledger.webp", AK / "1-Dashboard.png",
+     "AkunTuntas", "light", "Dashboard: cash-flow donut, monthly bars and the key totals"),
     ("mosaic-lumawall-catalog.webp", LW / "catalog.png",
      "LumaWall", "dark", "Catalog: category filters and the wallpaper detail panel"),
     ("mosaic-akun-coa.webp", S / "raw" / "akuntuntas-3.png",
@@ -100,8 +108,8 @@ TILES = [
      "AkunTuntas", "light", "Business partners with contact records"),
     ("mosaic-saybot-inbox.webp", S / "raw" / "saybot-2.png",
      "SayBot", "dark", "Unified inbox: every channel and contact in one workspace"),
-    ("mosaic-akun-dashboard.webp", S / "raw" / "akun-laporan.png",
-     "AkunTuntas", "light", "Dashboard: financial health and period summaries"),
+    ("mosaic-akun-dashboard.webp", AK / "2-Analisis-Keuangan.png",
+     "AkunTuntas", "light", "Financial analysis: the health score gauge and its insights"),
 ]
 
 
