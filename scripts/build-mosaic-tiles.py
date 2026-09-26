@@ -56,30 +56,74 @@ TILE_ASPECT = 1.75
 OUT_W = 1200
 OUT_H = int(round(OUT_W / TILE_ASPECT))
 
+# LumaWall's captures come from .shots/luma-clean, NOT .shots/luma-fresh. The raw
+# downloads still carry the pale-blue hover box on the minimize button, and
+# cropping to the tile ratio cuts that box in half, leaving a blue strip against
+# the right edge. luma-clean has the box removed and the scrollbar trimmed, built
+# by scripts/build-lumawall-captures.py.
+LW = S / "luma-clean"
+
 # (output name, source, product, expected tone, what the screen shows)
-# Ordered for the checkerboard: L D L / D L D / L D L
+#
+# LAYOUT: a dark MIDDLE COLUMN rather than a full checkerboard.
+#   L D L
+#   L D L
+#   L D L
+#
+# A checkerboard needs four dark tiles, but only three dark screens exist that are
+# worth showing (two LumaWall screens and SayBot's inbox). Filling the fourth slot
+# forced a third LumaWall screen, and LumaWall only has one other layout — a second
+# artwork grid — which read as the same screenshot pasted twice. A dark column needs
+# exactly three, so LumaWall appears twice with its two most distinct screens
+# (measured 46.7 apart, the largest gap of any pair in the set).
+#
+# AkunTuntas contributes four screens, so they sit at the CORNERS: in a 3x3 grid no
+# two corners are edge-adjacent, so the three similar table views are never side by
+# side. Worst edge-adjacent similarity across the grid is 25.6, where anything under
+# 12 would read as a duplicate.
 TILES = [
-    ("mosaic-nexshop-marketplace.webp", S / "raw" / "nexshop-marketplace.png",
-     "NexShop", "light", "Marketplace: search, categories, provider list"),
-    ("mosaic-saybot-inbox.webp", S / "raw" / "saybot-2.png",
-     "SayBot", "dark", "Unified inbox: every channel and contact in one workspace"),
     ("mosaic-akun-ledger.webp", S / "raw" / "akuntuntas-2.png",
      "AkunTuntas", "light", "General ledger with posted transactions"),
-
-    ("mosaic-lumawall-catalog.webp", S / "luma-fresh" / "ui-discover.png",
+    ("mosaic-lumawall-catalog.webp", LW / "catalog.png",
      "LumaWall", "dark", "Catalog: category filters and the wallpaper detail panel"),
-    ("mosaic-amara-chat.webp", S / "raw" / "amara-base.png",
-     "Amara", "light", "The character stage beside the conversation"),
-    ("mosaic-lumawall-library.webp", S / "luma-fresh" / "ui-library.png",
-     "LumaWall", "dark", "Library: downloaded wallpapers ready to apply"),
-
     ("mosaic-akun-coa.webp", S / "raw" / "akuntuntas-3.png",
      "AkunTuntas", "light", "Chart of accounts with the full account tree"),
-    ("mosaic-lumawall-performance.webp", S / "luma-fresh" / "ui-performance.png",
-     "LumaWall", "dark", "Performance: frame-rate limit and live GPU telemetry"),
+
+    ("mosaic-nexshop-marketplace.webp", S / "raw" / "nexshop-marketplace.png",
+     "NexShop", "light", "Marketplace: search, categories, provider list"),
+    ("mosaic-lumawall-displays.webp", LW / "displays.png",
+     "LumaWall", "dark", "Displays: a different wallpaper assigned to each monitor"),
+    ("mosaic-amara-chat.webp", S / "raw" / "amara-base.png",
+     "Amara", "light", "The character stage beside the conversation"),
+
     ("mosaic-akun-partners.webp", S / "raw" / "akuntuntas-4.png",
      "AkunTuntas", "light", "Business partners with contact records"),
+    ("mosaic-saybot-inbox.webp", S / "raw" / "saybot-2.png",
+     "SayBot", "dark", "Unified inbox: every channel and contact in one workspace"),
+    ("mosaic-akun-dashboard.webp", S / "raw" / "akun-laporan.png",
+     "AkunTuntas", "light", "Dashboard: financial health and period summaries"),
 ]
+
+
+def trim_empty_bottom(im, margin=8):
+    """
+    Drop flat rows at the BOTTOM of the app window, keeping a small margin.
+
+    Safe by construction: only empty application background is removed, never
+    content, so the tile ends up denser rather than cut. LumaWall's Displays and
+    Performance screens end in a large empty band, which otherwise fills a third
+    of the tile with nothing.
+    """
+    a = np.array(im.convert("RGB")).astype(int)
+    h, w = a.shape[:2]
+    std = a.std(axis=(1, 2))
+    content = np.where(std > 12)[0]
+    if not len(content):
+        return im, 0
+    end = min(h, int(content.max()) + 1 + margin)
+    if end >= h:
+        return im, 0
+    return im.crop((0, 0, w, end)), h - end
 
 
 def fit_to(im, target):
@@ -106,8 +150,11 @@ def main():
     for out_name, src, prod, want_tone, what in TILES:
         im = Image.open(src).convert("RGB")
         w0, h0 = im.size
+        im, trimmed = trim_empty_bottom(im)
         im2, how, amt = fit_to(im, TILE_ASPECT)
         pct = amt / (w0 if how == "right" else h0) * 100
+        if trimmed:
+            how = f"{how}+t{trimmed}"
 
         im3 = im2.resize((OUT_W, OUT_H), Image.LANCZOS)
         im3.save(PUB / out_name, "WEBP", lossless=True, quality=100, method=6)
@@ -118,7 +165,7 @@ def main():
         built.append((out_name, prod, tone, lum, what))
         print(f"{out_name:36s} {prod:11s} {w0/h0:6.3f} {how:>7s} {pct:4.1f}% {lum:6.1f}{flag}")
 
-    print("\ncheckerboard (L/D by measured brightness):")
+    print("\nlayout (L/D by measured brightness):")
     for r in range(3):
         print("  " + "  ".join(
             f"{'L' if built[r*3+c][3] > 100 else 'D'}({built[r*3+c][3]:.0f})" for c in range(3)

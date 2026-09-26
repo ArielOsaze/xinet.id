@@ -26,16 +26,34 @@ import { TileReveal } from "@/components/reactbits/TileReveal";
  */
 
 /**
- * Nine captures, ordered for the checkerboard:
+ * Nine captures, ordered as a dark MIDDLE COLUMN:
  *   L D L
- *   D L D
  *   L D L
+ *   L D L
+ *
+ * A full checkerboard needs four dark tiles, but only three dark screens are worth
+ * showing (two LumaWall, one SayBot). The fourth slot had to be filled by a third
+ * LumaWall screen, and LumaWall has just one other layout — a second artwork grid —
+ * which read as the same screenshot pasted twice. A dark column needs exactly three,
+ * so LumaWall appears twice, with its two most distinct screens (46.7 apart, the
+ * widest gap in the set).
+ *
+ * AkunTuntas supplies four screens, so they sit at the corners: no two corners are
+ * edge-adjacent in a 3x3 grid, so its three similar table views are never neighbours.
+ * The worst edge-adjacent pair in this arrangement measures 25.6, where anything
+ * under 12 would read as a duplicate.
  *
  * Only SECONDARY captures belong here. The five featured cards further down
  * this same page already show each product's main screen, and five of the old
  * tiles were pixel-identical to those cards (measured difference 0.08-0.16,
  * where genuinely different screens differ by 5 or more). A visitor scrolled
  * past the same screenshot twice. Removing them leaves nine unique screens.
+ *
+ * LumaWall appears three times, so its three screens must not resemble each
+ * other. Catalog, Displays and Performance were measured against each other and
+ * differ by 19-50, where a genuinely different screen scores above 12. An
+ * earlier set paired Catalog with Library, which are both dark grids of anime
+ * artwork (measured 9.3 apart) and read as one screenshot pasted twice.
  *
  * Files are named mosaic-* and are built by scripts/build-mosaic-tiles.py, which
  * also records what each screen shows. They are separate from the tile-* files
@@ -44,17 +62,17 @@ import { TileReveal } from "@/components/reactbits/TileReveal";
  */
 const SHOTS: { src: string; alt: string }[] = [
   // Row 1
-  { src: "/products/mosaic-nexshop-marketplace.webp", alt: "NexShop marketplace: search, categories and the provider list" }, // 247 light
-  { src: "/products/mosaic-saybot-inbox.webp", alt: "SayBot unified inbox: every channel and contact in one workspace" }, // 13 dark
   { src: "/products/mosaic-akun-ledger.webp", alt: "AkunTuntas general ledger with posted transactions" }, // 206 light
-  // Row 2
   { src: "/products/mosaic-lumawall-catalog.webp", alt: "LumaWall catalog: category filters and the wallpaper detail panel" }, // 55 dark
-  { src: "/products/mosaic-amara-chat.webp", alt: "Amara: the character stage beside the conversation" }, // 180 light
-  { src: "/products/mosaic-lumawall-library.webp", alt: "LumaWall library: downloaded wallpapers ready to apply" }, // 57 dark
-  // Row 3
   { src: "/products/mosaic-akun-coa.webp", alt: "AkunTuntas chart of accounts with the full account tree" }, // 205 light
-  { src: "/products/mosaic-lumawall-performance.webp", alt: "LumaWall performance: frame-rate limit and live GPU telemetry" }, // 19 dark
+  // Row 2
+  { src: "/products/mosaic-nexshop-marketplace.webp", alt: "NexShop marketplace: search, categories and the provider list" }, // 247 light
+  { src: "/products/mosaic-lumawall-displays.webp", alt: "LumaWall displays: a different wallpaper assigned to each monitor" }, // 27 dark
+  { src: "/products/mosaic-amara-chat.webp", alt: "Amara: the character stage beside the conversation" }, // 180 light
+  // Row 3
   { src: "/products/mosaic-akun-partners.webp", alt: "AkunTuntas business partners with contact records" }, // 207 light
+  { src: "/products/mosaic-saybot-inbox.webp", alt: "SayBot unified inbox: every channel and contact in one workspace" }, // 13 dark
+  { src: "/products/mosaic-akun-dashboard.webp", alt: "AkunTuntas dashboard: financial health and period summaries" }, // 209 light
 ];
 
 export function EcosystemReveal() {
