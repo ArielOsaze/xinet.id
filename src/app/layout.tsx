@@ -13,9 +13,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 const SITE_URL = "https://xinet.id";
-const TITLE = "Xinet · Build What's Next";
+const TITLE = "Xinet · Perusahaan Produk Digital Indonesia";
 const DESCRIPTION =
-  "Xinet is a digital product company building products across commerce, communication, business tools, automation and emerging technology.";
+  "Xinet membangun produk digital untuk commerce, komunikasi, alat bisnis, dan otomasi: NexShop, SayBot, AkunTuntas, Amara, dan LumaWall. Dibangun di Indonesia.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -29,22 +29,26 @@ export const metadata: Metadata = {
     "Xinet",
     "xinet.id",
     "Xinet Indonesia",
-    "digital product company",
-    "venture studio",
-    "product studio Indonesia",
+    "perusahaan produk digital",
+    "perusahaan teknologi Indonesia",
+    "studio produk digital",
     "NexShop",
     "NexShop Cloud",
+    "top up game murah",
+    "jual produk digital",
     "SayBot",
+    "aplikasi WhatsApp bisnis",
+    "chatbot WhatsApp Indonesia",
     "AkunTuntas",
-    "Amara AI Assistant",
-    "LumaWall",
-    "top up game",
-    "WhatsApp automation",
     "software akuntansi",
-    "AI assistant Indonesia",
+    "aplikasi pembukuan",
+    "software pajak Indonesia",
+    "Amara AI Assistant",
+    "asisten AI Indonesia",
+    "LumaWall",
     "live wallpaper Windows",
-    "digital products",
-    "business software",
+    "wallpaper hidup Windows",
+    "software buatan Indonesia",
     "Indonesia",
   ],
   authors: [{ name: "Xinet", url: SITE_URL }],
@@ -95,7 +99,7 @@ const STRUCTURED_DATA = {
       name: "Xinet",
       url: SITE_URL,
       description: DESCRIPTION,
-      slogan: "Build what's next.",
+      slogan: "Bangun yang berikutnya.",
       email: "contactxinet@yahoo.com",
       contactPoint: {
         "@type": "ContactPoint",
@@ -136,7 +140,7 @@ const STRUCTURED_DATA = {
             name: "NexShop",
             applicationCategory: "BusinessApplication",
             description:
-              "A digital commerce platform for game top-ups, digital products and reseller services.",
+              "Platform perdagangan digital untuk top up game, produk digital, dan layanan reseller.",
             url: "https://nexshop.cloud",
             operatingSystem: "Web",
             publisher: { "@id": `${SITE_URL}/#organization` },
@@ -150,7 +154,7 @@ const STRUCTURED_DATA = {
             name: "SayBot",
             applicationCategory: "BusinessApplication",
             description:
-              "A multi-channel messaging workspace for WhatsApp, Telegram, Email and Website.",
+              "Ruang kerja perpesanan multi-kanal untuk WhatsApp, Telegram, Email, dan Chat Website.",
             url: "https://saybot.nexshop.cloud",
             operatingSystem: "Web",
             publisher: { "@id": `${SITE_URL}/#organization` },
@@ -164,7 +168,7 @@ const STRUCTURED_DATA = {
             name: "AkunTuntas",
             "applicationCategory": "FinanceApplication",
             description:
-              "Bookkeeping and tax software for Indonesian small businesses, computing PPh 21, corporate income tax and VAT offline.",
+              "Aplikasi pembukuan dan pajak untuk UMKM Indonesia: menghitung PPh 21, PPh Badan, dan PPN secara offline.",
             url: "https://akuntuntas.xinet.id",
             operatingSystem: "Windows",
             publisher: { "@id": `${SITE_URL}/#organization` },
@@ -178,7 +182,7 @@ const STRUCTURED_DATA = {
             name: "Amara AI Assistant",
             applicationCategory: "UtilitiesApplication",
             description:
-              "An AI desktop companion with a 3D avatar and voice conversation.",
+              "Asisten AI desktop dengan avatar 3D dan percakapan suara.",
             operatingSystem: "Windows",
             publisher: { "@id": `${SITE_URL}/#organization` },
           },
@@ -191,7 +195,7 @@ const STRUCTURED_DATA = {
             name: "LumaWall",
             applicationCategory: "UtilitiesApplication",
             description:
-              "A Windows live wallpaper application with a multi-monitor catalog.",
+              "Aplikasi wallpaper hidup Windows dengan katalog multi-monitor.",
             url: "https://lumawall.xinet.id",
             operatingSystem: "Windows",
             publisher: { "@id": `${SITE_URL}/#organization` },
