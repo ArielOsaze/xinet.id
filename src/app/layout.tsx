@@ -83,6 +83,12 @@ export const metadata: Metadata = {
   },
   category: "technology",
   formatDetection: { telephone: false, address: false, email: false },
+  // Kode verifikasi Google Search Console. Ganti nilai di bawah dengan kode
+  // dari Google, lalu deploy ulang. Setelah terverifikasi, baris ini boleh
+  // dibiarkan.
+  verification: {
+    google: "NILAI_KODE_VERIFIKASI",
+  },
 };
 
 /**
